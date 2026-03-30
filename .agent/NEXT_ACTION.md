@@ -1,1 +1,1 @@
-Config-root and direct log parsing fix applied for analyze-log CI issue. Confirm PR #13 checks go green.
+Missing tracked log fixture added for analyze-log CI issue. Confirm PR #13 checks go green.

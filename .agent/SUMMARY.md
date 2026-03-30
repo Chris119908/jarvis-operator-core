@@ -7,10 +7,11 @@ Evidence captured:
 - `src/jarvis_operator/orchestrator.py` uses that stable workspace root for relative task paths and tool `cwd`
 - `src/jarvis_operator/orchestrator.py` now parses the resolved log file directly for the `analyze log` use case
 - the changed-working-directory case remains covered by E2E tests
+- GitHub CI still failed because `fixtures/logs/sample_error.log` was not tracked and was excluded by `.gitignore` via `logs/`
 
 Validation result:
 - `python -m pytest tests/e2e/test_analyze_log.py`
 - `python -m pytest tests`
 
 Status:
-- branch updated with the focused workspace-root fix for the analyze-log CI issue
+- branch updated with the focused workspace-root fix and the missing tracked log fixture for the analyze-log CI issue
