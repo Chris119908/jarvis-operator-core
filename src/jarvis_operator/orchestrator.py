@@ -1,21 +1,33 @@
 from __future__ import annotations
 
 from jarvis_operator.config import AppConfig
-from jarvis_operator.providers.mock_provider import MockProvider
+from jarvis_operator.tools.registry import ToolRegistry
+from jarvis_operator.tools.safe_cli_run import SafeCLIRunner
 
 
 class Orchestrator:
-    def __init__(self, provider) -> None:
-        self.provider = provider
+    def __init__(self, tool_registry: ToolRegistry) -> None:
+        self.tool_registry = tool_registry
 
     @classmethod
     def from_config(cls, config: AppConfig) -> "Orchestrator":
-        provider_type = config.provider.type
-        if provider_type == "mock":
-            provider = MockProvider()
-        else:
-            raise NotImplementedError(f"Provider not yet implemented: {provider_type}")
-        return cls(provider)
+        registry = ToolRegistry()
+        registry.register(
+            "safe_cli_run",
+            SafeCLIRunner(
+                allowed_commands=config.tools.safe_cli.allowed_commands,
+                allowed_workspaces=config.tools.allowed_workspaces,
+                default_timeout_seconds=config.tools.safe_cli.default_timeout_seconds,
+            ),
+        )
+        return cls(registry)
 
-    def run_task(self, task: str) -> str:
-        return self.provider.generate_text(f"Task: {task}")
+    def run(self, task: str) -> dict:
+        if "echo" not in task:
+            raise ValueError("No tool mapping for task")
+
+        tool = self.tool_registry.get("safe_cli_run")
+        return tool.run(["echo", task], cwd=".")
+
+    def run_task(self, task: str) -> dict:
+        return self.run(task)

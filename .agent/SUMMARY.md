@@ -1,13 +1,13 @@
 # Summary
 
-Current iteration completed Issue #4 for the minimal `ToolRegistry` without expanding scope.
+Current iteration completed Issue #5 for the minimal orchestrator without expanding scope.
 
 Evidence captured:
-- `src/jarvis_operator/tools/registry.py`
-- `tests/unit/test_tool_registry.py`
+- `src/jarvis_operator/orchestrator.py`
+- `tests/integration/test_orchestrator.py`
 
 Validation result:
-- `python -m pytest tests/unit/test_tool_registry.py`
+- `python -m pytest tests/integration/test_orchestrator.py`
 
 Current focus:
 - keep progressing in the smallest tested increments
