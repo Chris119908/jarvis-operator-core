@@ -1,13 +1,13 @@
 # Summary
 
-Current iteration completed Issue #3 for `safe_cli_run` without expanding scope.
+Current iteration completed Issue #4 for the minimal `ToolRegistry` without expanding scope.
 
 Evidence captured:
-- `src/jarvis_operator/tools/safe_cli_run.py`
-- `tests/unit/test_safe_cli_run.py`
+- `src/jarvis_operator/tools/registry.py`
+- `tests/unit/test_tool_registry.py`
 
 Validation result:
-- `python -m pytest tests/unit/test_safe_cli_run.py`
+- `python -m pytest tests/unit/test_tool_registry.py`
 
 Current focus:
 - keep progressing in the smallest tested increments
