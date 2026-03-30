@@ -1,13 +1,13 @@
 # Summary
 
-Current iteration completed Issue #5 for the minimal orchestrator without expanding scope.
+Current iteration completed Issue #6 for the minimal validator without expanding scope.
 
 Evidence captured:
-- `src/jarvis_operator/orchestrator.py`
-- `tests/integration/test_orchestrator.py`
+- `src/jarvis_operator/validation/validator.py`
+- `tests/unit/test_validator.py`
 
 Validation result:
-- `python -m pytest tests/integration/test_orchestrator.py`
+- `python -m pytest tests/unit/test_validator.py`
 
 Current focus:
 - keep progressing in the smallest tested increments

@@ -3,7 +3,7 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "in_progress",
-  "current_step": "Minimal orchestrator maps echo tasks to safe_cli_run via ToolRegistry with passing integration tests.",
+  "current_step": "Minimal validator evaluates tool results into a structured success/failure outcome with passing unit tests.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -12,7 +12,8 @@
     "Validated MockProvider with deterministic unit tests for health_check, generate_text, generate_structured, and get_model_name.",
     "Completed Issue #3 by validating safe_cli_run behavior and safety constraints with unit tests.",
     "Completed Issue #4 by implementing a minimal ToolRegistry and validating safe_cli_run integration through the registry.",
-    "Completed Issue #5 by implementing a minimal orchestrator that routes echo tasks through ToolRegistry to safe_cli_run."
+    "Completed Issue #5 by implementing a minimal orchestrator that routes echo tasks through ToolRegistry to safe_cli_run.",
+    "Completed Issue #6 by implementing a minimal validator for tool results with unit tests."
   ],
   "pending_steps": [
     "Verify StateStore behavior for missing STATE.json with tests",
@@ -25,5 +26,5 @@
     "tests/unit/test_cli.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "passed: python -m pytest tests/integration/test_orchestrator.py"
+  "last_validation_status": "passed: python -m pytest tests/unit/test_validator.py"
 }
