@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 from jarvis_operator.config import AppConfig
 from jarvis_operator.providers.mock_provider import MockProvider
@@ -11,6 +12,7 @@ from jarvis_operator.tools.safe_cli_run import SafeCLIRunner
 from jarvis_operator.validation.validator import Validator
 
 logger = logging.getLogger(__name__)
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Orchestrator:
@@ -58,14 +60,14 @@ class Orchestrator:
                 cwd=".",
             )
         elif task.startswith("analyze log "):
-            target = task.removeprefix("analyze log ").strip()
+            target = self._resolve_repo_path(task.removeprefix("analyze log ").strip())
             tool_result = tool.run(
                 [
                     "python",
                     "-c",
                     (
                         "from pathlib import Path; "
-                        f"text=Path({target!r}).read_text(encoding='utf-8'); "
+                        f"text=Path({target.as_posix()!r}).read_text(encoding='utf-8'); "
                         "lines=text.splitlines(); "
                         "errors=[line for line in lines if 'ERROR' in line]; "
                         "warnings=[line for line in lines if 'WARNING' in line]; "
@@ -136,6 +138,21 @@ class Orchestrator:
 
     def run_task(self, task: str) -> dict:
         return self.run(task)
+
+    @staticmethod
+    def _resolve_repo_path(raw_path: str) -> Path:
+        path = Path(raw_path)
+        if path.is_absolute():
+            return path.resolve()
+
+        candidates = [(Path.cwd() / path).resolve(), (REPO_ROOT / path).resolve()]
+        candidates.extend((parent / path).resolve() for parent in Path.cwd().resolve().parents)
+
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+
+        return (REPO_ROOT / path).resolve()
 
     @staticmethod
     def _build_test_failure_explanation(tool_result: dict) -> dict:

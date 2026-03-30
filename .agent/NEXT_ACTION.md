@@ -1,1 +1,1 @@
-V1 completed. Ready for review or next phase.
+CI path-resolution hardening pushed with regression coverage. Confirm PR #11 checks go green.

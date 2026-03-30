@@ -1,23 +1,21 @@
 # Summary
 
-V1 completed. Ready for review or next phase.
+The CI branch now includes the minimal pytest workflow plus the focused follow-up fix for the Ubuntu log-analysis failure.
 
 Evidence captured:
-- all 4 fixed V1 use cases covered by real E2E tests
-- CLI install path covered by smoke tests
-- tool, validator, provider, integration, smoke, and E2E coverage all passing
+- `.github/workflows/tests.yml`
+- workflow steps aligned with `pyproject.toml`
+- Python's scripts directory is exported to `PATH` before pytest runs
+- `analyze log` now resolves relative fixture paths by checking the current working tree and walking upward until the fixture is found
+- the changed-working-directory case is now covered by an E2E test
 
-Final validation result:
-- `python -m pytest tests/unit`
-- `python -m pytest tests/integration`
-- `python -m pytest tests/e2e`
-- `python -m pytest tests/smoke`
+Validation result:
+- workflow uses `python -m pip install -e .`
+- workflow exposes the installed console-script location to GitHub Actions
+- workflow runs `python -m pytest tests`
+- matrix covers Python `3.11` and `3.12`
+- `python -m pytest tests/e2e/test_analyze_log.py`
 - `python -m pytest tests`
 
-Definition-of-done status:
-- all 4 use cases functioning
-- CLI functioning
-- tools functioning
-- validator functioning
-- full automated suite green
-- no known critical gaps remain for V1
+Status:
+- branch updated with the focused CI fix path and the GitHub-reported failing test addressed
