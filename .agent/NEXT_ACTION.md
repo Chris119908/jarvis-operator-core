@@ -1,1 +1,1 @@
-V1 completed. Ready for review or next phase.
+CI configured. Ready for review or next phase.

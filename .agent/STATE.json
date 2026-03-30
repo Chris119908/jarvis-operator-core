@@ -3,7 +3,7 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "completed",
-  "current_step": "V1 completed. Ready for review or next phase.",
+  "current_step": "Minimal pytest CI workflow added and aligned with the current project setup.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -28,7 +28,8 @@
     "Implemented a minimal tested OllamaProvider with clear connectivity and generation behavior.",
     "Implemented a minimal tested OpenAI-compatible provider with clear connectivity and generation behavior.",
     "Wired configured provider selection into the orchestrator runtime path with coverage for mock, ollama, and openai_compatible.",
-    "Integrated logging into the CLI and orchestrator runtime path with test coverage."
+    "Integrated logging into the CLI and orchestrator runtime path with test coverage.",
+    "Added a minimal GitHub Actions workflow for pytest on push and pull requests."
   ],
   "pending_steps": [],
   "known_blockers": [],
@@ -36,5 +37,5 @@
     "tests/unit/test_cli.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "passed: python -m pytest tests/unit; python -m pytest tests/integration; python -m pytest tests/e2e; python -m pytest tests/smoke; python -m pytest tests"
+  "last_validation_status": "workflow logically verified against `python -m pip install -e .` and `python -m pytest tests`"
 }
