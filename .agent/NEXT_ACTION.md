@@ -1,1 +1,1 @@
-Config-root workspace fix applied for analyze-log CI issue. Confirm PR #11 checks go green.
+Config-root and direct log parsing fix applied for analyze-log CI issue. Confirm PR #13 checks go green.

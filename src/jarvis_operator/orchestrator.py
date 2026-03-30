@@ -62,21 +62,15 @@ class Orchestrator:
             )
         elif task.startswith("analyze log "):
             target = self._resolve_repo_path(task.removeprefix("analyze log ").strip())
-            tool_result = tool.run(
-                [
-                    "python",
-                    "-c",
-                    (
-                        "from pathlib import Path; "
-                        f"text=Path({target.as_posix()!r}).read_text(encoding='utf-8'); "
-                        "lines=text.splitlines(); "
-                        "errors=[line for line in lines if 'ERROR' in line]; "
-                        "warnings=[line for line in lines if 'WARNING' in line]; "
-                        "print(f'errors={len(errors)} warnings={len(warnings)}')"
-                    ),
-                ],
-                cwd=self.workspace_root,
-            )
+            lines = target.read_text(encoding="utf-8").splitlines()
+            errors = [line for line in lines if "ERROR" in line]
+            warnings = [line for line in lines if "WARNING" in line]
+            tool_result = {
+                "returncode": 0,
+                "stdout": f"errors={len(errors)} warnings={len(warnings)}\n",
+                "stderr": "",
+                "timed_out": False,
+            }
         elif task.startswith("create project "):
             target = task.removeprefix("create project ").strip()
             tool_result = tool.run(
