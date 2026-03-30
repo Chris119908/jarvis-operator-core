@@ -1,8 +1,9 @@
 # Next Action
 
-Run the broader automated evidence already expected by the repository:
+Start closing the biggest remaining V1 gap with the smallest concrete step:
 
-- run `python -m pytest tests/unit tests/integration tests/smoke`
-- record the validation result
+- replace one placeholder file in `tests/e2e/` with a real end-to-end test for a fixed V1 use case
+- choose the smallest use case that fits the current architecture
+- implement only the minimum production code needed to make that one E2E test meaningful
 - update `.agent/STATE.json`, `.agent/SUMMARY.md`, and `.agent/NEXT_ACTION.md`
-- if failures remain, record them in `.agent/KNOWN_ISSUES.md`
+- record unresolved failures in `.agent/KNOWN_ISSUES.md` if any appear

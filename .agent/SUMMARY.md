@@ -1,13 +1,14 @@
 # Summary
 
-Current iteration completed the next smallest StateStore contract check.
+Current iteration established a clean broader validation baseline.
 
 Evidence captured:
-- `src/jarvis_operator/state/store.py`
-- `tests/unit/test_state_store.py`
+- `tests/unit`
+- `tests/integration`
+- `tests/smoke`
 
 Validation result:
-- `python -m pytest tests/unit/test_state_store.py`
+- `python -m pytest tests/unit tests/integration tests/smoke`
 
 Current focus:
 - keep progressing in the smallest tested increments
