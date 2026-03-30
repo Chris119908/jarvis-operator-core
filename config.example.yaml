@@ -1,0 +1,23 @@
+provider:
+  type: "mock"   # mock | ollama | openai_compatible
+  model: "mock-model"
+  base_url: "http://localhost:11434"
+  api_key_env: "OPENAI_API_KEY"
+
+runtime:
+  state_dir: ".agent"
+  workspace_root: "."
+  log_dir: "logs"
+  log_level: "INFO"
+
+tools:
+  allowed_workspaces:
+    - "."
+  safe_cli:
+    allowed_commands:
+      - "pytest"
+      - "python"
+      - "echo"
+      - "ls"
+      - "dir"
+    default_timeout_seconds: 60

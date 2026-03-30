@@ -1,0 +1,22 @@
+{
+  "project_name": "jarvis-operator-core",
+  "version_target": "v1",
+  "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
+  "current_status": "not_started",
+  "current_step": "Initialize repository skeleton and core project files.",
+  "completed_steps": [],
+  "pending_steps": [
+    "Create package structure",
+    "Add pyproject and configuration loading",
+    "Implement mock LLM provider",
+    "Implement state store",
+    "Implement tool registry and safe_cli_run",
+    "Implement CLI entrypoint",
+    "Add tests",
+    "Run smoke checks"
+  ],
+  "known_blockers": [],
+  "created_artifacts": [],
+  "selected_provider": "mock",
+  "last_validation_status": "not_validated"
+}
