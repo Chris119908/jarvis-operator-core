@@ -1,3 +1,7 @@
+from jarvis_operator.config import AppConfig
+from jarvis_operator.providers.mock_provider import MockProvider
+from jarvis_operator.providers.ollama_provider import OllamaProvider
+from jarvis_operator.providers.openai_compatible_provider import OpenAICompatibleProvider
 from jarvis_operator.tools.registry import ToolRegistry
 from jarvis_operator.orchestrator import Orchestrator
 
@@ -26,11 +30,37 @@ class FailingTool:
         }
 
 
+def build_config(provider_type: str, model: str, base_url: str | None = None) -> AppConfig:
+    return AppConfig.model_validate(
+        {
+            "provider": {
+                "type": provider_type,
+                "model": model,
+                "base_url": base_url,
+                "api_key_env": "OPENAI_API_KEY",
+            },
+            "runtime": {
+                "state_dir": ".agent",
+                "workspace_root": ".",
+                "log_dir": "logs",
+                "log_level": "INFO",
+            },
+            "tools": {
+                "allowed_workspaces": ["."],
+                "safe_cli": {
+                    "allowed_commands": ["python", "pytest", "echo", "ls", "dir"],
+                    "default_timeout_seconds": 60,
+                },
+            },
+        }
+    )
+
+
 def test_simple_task_execution():
     registry = ToolRegistry()
     tool = RecordingTool()
     registry.register("safe_cli_run", tool)
-    orchestrator = Orchestrator(registry)
+    orchestrator = Orchestrator(registry, MockProvider())
 
     result = orchestrator.run("echo hello")
 
@@ -43,7 +73,7 @@ def test_correct_tool_selection():
     registry = ToolRegistry()
     tool = RecordingTool()
     registry.register("safe_cli_run", tool)
-    orchestrator = Orchestrator(registry)
+    orchestrator = Orchestrator(registry, MockProvider())
 
     orchestrator.run("echo hello")
 
@@ -59,7 +89,7 @@ def test_result_structure_includes_validation():
     registry = ToolRegistry()
     tool = RecordingTool()
     registry.register("safe_cli_run", tool)
-    orchestrator = Orchestrator(registry)
+    orchestrator = Orchestrator(registry, MockProvider())
 
     result = orchestrator.run("echo hello")
 
@@ -83,7 +113,7 @@ def test_result_structure_includes_validation():
 def test_failure_case_includes_failed_validation():
     registry = ToolRegistry()
     registry.register("safe_cli_run", FailingTool())
-    orchestrator = Orchestrator(registry)
+    orchestrator = Orchestrator(registry, MockProvider())
 
     result = orchestrator.run("echo hello")
 
@@ -95,3 +125,27 @@ def test_failure_case_includes_failed_validation():
         "has_output": False,
         "error_detected": True,
     }
+
+
+def test_from_config_selects_mock_provider():
+    orchestrator = Orchestrator.from_config(build_config("mock", "mock-model"))
+
+    assert isinstance(orchestrator.provider, MockProvider)
+
+
+def test_from_config_selects_ollama_provider():
+    orchestrator = Orchestrator.from_config(
+        build_config("ollama", "llama3", "http://ollama.local")
+    )
+
+    assert isinstance(orchestrator.provider, OllamaProvider)
+    assert orchestrator.provider.get_model_name() == "llama3"
+
+
+def test_from_config_selects_openai_compatible_provider():
+    orchestrator = Orchestrator.from_config(
+        build_config("openai_compatible", "gpt-4o-mini", "http://openai.local/v1")
+    )
+
+    assert isinstance(orchestrator.provider, OpenAICompatibleProvider)
+    assert orchestrator.provider.get_model_name() == "gpt-4o-mini"

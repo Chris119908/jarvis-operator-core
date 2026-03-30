@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 from jarvis_operator.config import AppConfig
+from jarvis_operator.providers.mock_provider import MockProvider
+from jarvis_operator.providers.ollama_provider import OllamaProvider
+from jarvis_operator.providers.openai_compatible_provider import OpenAICompatibleProvider
 from jarvis_operator.tools.registry import ToolRegistry
 from jarvis_operator.tools.safe_cli_run import SafeCLIRunner
 from jarvis_operator.validation.validator import Validator
 
 
 class Orchestrator:
-    def __init__(self, tool_registry: ToolRegistry) -> None:
+    def __init__(self, tool_registry: ToolRegistry, provider) -> None:
         self.tool_registry = tool_registry
+        self.provider = provider
         self.validator = Validator()
 
     @classmethod
@@ -22,7 +26,22 @@ class Orchestrator:
                 default_timeout_seconds=config.tools.safe_cli.default_timeout_seconds,
             ),
         )
-        return cls(registry)
+        if config.provider.type == "mock":
+            provider = MockProvider()
+        elif config.provider.type == "ollama":
+            provider = OllamaProvider(
+                model=config.provider.model,
+                base_url=config.provider.base_url or "http://localhost:11434",
+            )
+        elif config.provider.type == "openai_compatible":
+            provider = OpenAICompatibleProvider(
+                model=config.provider.model,
+                base_url=config.provider.base_url or "http://localhost:8000/v1",
+            )
+        else:
+            raise NotImplementedError(f"Provider not yet implemented: {config.provider.type}")
+
+        return cls(registry, provider)
 
     def run(self, task: str) -> dict:
         tool = self.tool_registry.get("safe_cli_run")

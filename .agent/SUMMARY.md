@@ -1,14 +1,14 @@
 # Summary
 
-Current iteration implemented the second real non-mock provider in minimal form.
+Current iteration wired provider selection into the runtime path.
 
 Evidence captured:
-- `src/jarvis_operator/providers/openai_compatible_provider.py`
-- `tests/unit/test_openai_compatible_provider.py`
-- `tests/unit/test_provider_placeholders.py`
+- `src/jarvis_operator/orchestrator.py`
+- `tests/integration/test_orchestrator.py`
+- `tests/integration/test_orchestrator_mock.py`
 
 Validation result:
-- `python -m pytest tests/unit/test_openai_compatible_provider.py tests/unit/test_provider_placeholders.py`
+- `python -m pytest tests/integration/test_orchestrator.py tests/integration/test_orchestrator_mock.py tests/integration/test_cli_run_flow.py`
 - `python -m pytest tests`
 
 Current focus:
