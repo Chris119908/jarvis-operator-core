@@ -1,1 +1,1 @@
-Next smallest V2.2 task: add integration coverage that the orchestrator actually uses provider-backed LLM recovery decisions after a failed first tool execution.
+Next smallest V2.2 task: verify and harden how `needs_human_input` decisions are surfaced by the orchestrator without changing execution control boundaries.

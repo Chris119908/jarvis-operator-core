@@ -215,8 +215,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class StructuredProvider:
-    def __init__(self, payload: dict) -> None:
-        self.payload = payload
+    def __init__(self, payload) -> None:
+        if isinstance(payload, list):
+            self.payloads = payload
+        else:
+            self.payloads = [payload]
+        self.calls: list[dict] = []
 
     def health_check(self) -> bool:
         return True
@@ -225,7 +229,9 @@ class StructuredProvider:
         return ""
 
     def generate_structured(self, prompt: str, schema: dict) -> dict:
-        return self.payload
+        self.calls.append({"prompt": prompt, "schema": schema})
+        index = min(len(self.calls) - 1, len(self.payloads) - 1)
+        return self.payloads[index]
 
     def get_model_name(self) -> str:
         return "structured-provider"
@@ -323,6 +329,55 @@ def test_orchestrator_rejects_invalid_llm_decision_output():
         assert str(exc) == "Invalid decision output."
     else:
         raise AssertionError("Expected ValueError for invalid LLM decision output")
+
+
+def test_orchestrator_uses_provider_backed_llm_recovery_after_failure():
+    registry = ToolRegistry()
+    tool = FlakyTool()
+    registry.register("safe_cli_run", tool)
+    provider = StructuredProvider(
+        [
+            {
+                "decision_type": "tool_call",
+                "tool_name": "safe_cli_run",
+                "arguments": {
+                    "command": ["python", "-c", "print('first attempt')"],
+                    "cwd": str(REPO_ROOT),
+                },
+                "confidence": 0.9,
+                "explanation": "Initial structured tool call.",
+            },
+            {
+                "decision_type": "tool_call",
+                "tool_name": "safe_cli_run",
+                "arguments": {
+                    "command": ["python", "-c", "print('recovery attempt')"],
+                    "cwd": str(REPO_ROOT),
+                },
+                "confidence": 0.8,
+                "explanation": "One bounded recovery attempt.",
+            },
+        ]
+    )
+    orchestrator = Orchestrator(
+        registry,
+        provider,
+        workspace_root=REPO_ROOT,
+        decision_engine=LLMDecisionEngine(provider),
+    )
+
+    result = orchestrator.run("echo hello")
+
+    assert tool.calls == 2
+    assert len(provider.calls) == 2
+    assert "failed operator action" in provider.calls[1]["prompt"]
+    assert result["validation"]["success"] is True
+    assert result["recovery"]["attempted"] is True
+    assert result["recovery"]["decision"]["arguments"]["command"] == [
+        "python",
+        "-c",
+        "print('recovery attempt')",
+    ]
 
 
 def test_orchestrator_raises_for_rejected_decision():
