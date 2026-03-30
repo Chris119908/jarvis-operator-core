@@ -1,13 +1,14 @@
 # Summary
 
-Current iteration established a clean broader validation baseline.
+Current iteration turned the first placeholder E2E into a real fixed V1 use case.
 
 Evidence captured:
-- `tests/unit`
-- `tests/integration`
-- `tests/smoke`
+- `src/jarvis_operator/orchestrator.py`
+- `tests/e2e/test_run_tests.py`
 
 Validation result:
+- `python -m pytest tests/e2e/test_run_tests.py`
+- `python -m pytest tests/e2e`
 - `python -m pytest tests/unit tests/integration tests/smoke`
 
 Current focus:

@@ -25,14 +25,22 @@ class Orchestrator:
         return cls(registry)
 
     def run(self, task: str) -> dict:
-        if "echo" not in task:
+        tool = self.tool_registry.get("safe_cli_run")
+
+        if task.startswith("run tests "):
+            target = task.removeprefix("run tests ").strip()
+            tool_result = tool.run(
+                ["python", "-m", "pytest", target],
+                cwd=".",
+            )
+        elif "echo" in task:
+            tool_result = tool.run(
+                ["python", "-c", f"print({task!r})"],
+                cwd=".",
+            )
+        else:
             raise ValueError("No tool mapping for task")
 
-        tool = self.tool_registry.get("safe_cli_run")
-        tool_result = tool.run(
-            ["python", "-c", f"print({task!r})"],
-            cwd=".",
-        )
         validation = self.validator.validate(tool_result)
         return {
             "tool_result": tool_result,

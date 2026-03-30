@@ -3,7 +3,7 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "in_progress",
-  "current_step": "The broader unit, integration, and smoke evidence now passes end-to-end.",
+  "current_step": "The first fixed V1 use case now has a real end-to-end test for running tests through the orchestrator.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -18,11 +18,12 @@
     "Reconciled stale integration expectations and made orchestrator execution path pass the broader unit, integration, and smoke test subset.",
     "Verified StateStore returns an empty dict when STATE.json is missing.",
     "Verified StateStore raises JSONDecodeError for broken STATE.json.",
-    "Validated the current unit, integration, and smoke subset with all tests passing."
+    "Validated the current unit, integration, and smoke subset with all tests passing.",
+    "Implemented the first real V1 end-to-end use case for running tests through the orchestrator."
   ],
   "pending_steps": [
-    "Replace the first placeholder end-to-end test with a real V1 use case",
-    "Implement the first fixed V1 use case end-to-end",
+    "Replace the next placeholder end-to-end test with a real fixed V1 use case",
+    "Implement the next smallest fixed V1 use case end-to-end",
     "Add remaining end-to-end tests"
   ],
   "known_blockers": [],
@@ -30,5 +31,5 @@
     "tests/unit/test_cli.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "passed: python -m pytest tests/unit tests/integration tests/smoke"
+  "last_validation_status": "passed: python -m pytest tests/e2e tests/unit tests/integration tests/smoke"
 }
