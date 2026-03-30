@@ -3,11 +3,12 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "in_progress",
-  "current_step": "Config loading accepts Path inputs and rejects empty YAML mappings with passing unit tests.",
+  "current_step": "Config loading is implemented with validation for valid, invalid, and missing config files.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
-    "Hardened config loading for empty YAML input and expanded config loading tests."
+    "Hardened config loading for empty YAML input and expanded config loading tests.",
+    "Completed Issue #1 for robust config loading with unit tests for valid, invalid, and missing config files."
   ],
   "pending_steps": [
     "Verify StateStore behavior for missing STATE.json with tests",

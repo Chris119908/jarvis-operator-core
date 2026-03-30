@@ -37,8 +37,13 @@ class AppConfig(BaseModel):
 
 def load_config(path: str | Path) -> AppConfig:
     config_path = Path(path)
+    if not config_path.exists():
+        raise FileNotFoundError(f"Config file not found: {config_path}")
+
     with config_path.open("r", encoding="utf-8") as f:
         raw = yaml.safe_load(f)
+
     if not isinstance(raw, dict):
         raise ValueError("Config file must contain a YAML mapping.")
+
     return AppConfig.model_validate(raw)

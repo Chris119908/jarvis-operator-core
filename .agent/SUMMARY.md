@@ -1,8 +1,9 @@
 # Summary
 
-Current iteration tightened config loading without expanding scope.
+Current iteration completed Issue #1 for config loading without expanding scope.
 
 Evidence captured:
+- `src/jarvis_operator/config.py`
 - `tests/unit/test_config.py`
 
 Validation result:
