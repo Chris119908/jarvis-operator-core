@@ -3,7 +3,7 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "in_progress",
-  "current_step": "All four fixed V1 use cases now have real end-to-end tests and the full test suite passes.",
+  "current_step": "Remaining provider placeholders now have lightweight initialization tests and clear current behavior coverage.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -22,10 +22,10 @@
     "Implemented the first real V1 end-to-end use case for running tests through the orchestrator.",
     "Implemented a second real V1 end-to-end use case for analyzing log files through the orchestrator.",
     "Implemented real end-to-end coverage for project scaffold creation and structure generation from a specification.",
-    "Validated the complete test suite with all tests passing."
+    "Validated the complete test suite with all tests passing.",
+    "Added lightweight tests for the current Ollama and OpenAI-compatible provider placeholders."
   ],
   "pending_steps": [
-    "Add lightweight initialization tests for the remaining provider placeholders",
     "Verify install-target behavior against the documented commands",
     "Assess remaining V1 definition-of-done gaps"
   ],
@@ -34,5 +34,5 @@
     "tests/unit/test_cli.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "passed: python -m pytest tests"
+  "last_validation_status": "passed: python -m pytest tests/unit/test_provider_placeholders.py"
 }
