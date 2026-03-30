@@ -1,13 +1,16 @@
 # Summary
 
-Current iteration completed Issue #7 for validator integration in the orchestrator without expanding scope.
+Current iteration reconciled the orchestrator path with the broader repository test suite.
 
 Evidence captured:
 - `src/jarvis_operator/orchestrator.py`
+- `tests/integration/test_cli_run_flow.py`
+- `tests/integration/test_orchestrator_mock.py`
 - `tests/integration/test_orchestrator.py`
 
 Validation result:
 - `python -m pytest tests/integration/test_orchestrator.py`
+- `python -m pytest tests/unit tests/integration tests/smoke`
 
 Current focus:
 - keep progressing in the smallest tested increments

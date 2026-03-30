@@ -47,7 +47,12 @@ def test_correct_tool_selection():
 
     orchestrator.run("echo hello")
 
-    assert tool.calls == [{"command": ["echo", "echo hello"], "cwd": "."}]
+    assert tool.calls == [
+        {
+            "command": ["python", "-c", "print('echo hello')"],
+            "cwd": ".",
+        }
+    ]
 
 
 def test_result_structure_includes_validation():

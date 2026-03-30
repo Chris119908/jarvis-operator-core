@@ -29,7 +29,10 @@ class Orchestrator:
             raise ValueError("No tool mapping for task")
 
         tool = self.tool_registry.get("safe_cli_run")
-        tool_result = tool.run(["echo", task], cwd=".")
+        tool_result = tool.run(
+            ["python", "-c", f"print({task!r})"],
+            cwd=".",
+        )
         validation = self.validator.validate(tool_result)
         return {
             "tool_result": tool_result,
