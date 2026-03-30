@@ -1,1 +1,1 @@
-CI configured. Ready for review or next phase.
+CI reliability fix applied. Re-run GitHub Actions checks on PR #11.
