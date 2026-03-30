@@ -60,11 +60,7 @@ class Orchestrator:
                 cwd=".",
             )
         elif task.startswith("analyze log "):
-            target = Path(task.removeprefix("analyze log ").strip())
-            if not target.is_absolute():
-                target = (REPO_ROOT / target).resolve()
-            else:
-                target = target.resolve()
+            target = self._resolve_repo_path(task.removeprefix("analyze log ").strip())
             tool_result = tool.run(
                 [
                     "python",
@@ -142,6 +138,21 @@ class Orchestrator:
 
     def run_task(self, task: str) -> dict:
         return self.run(task)
+
+    @staticmethod
+    def _resolve_repo_path(raw_path: str) -> Path:
+        path = Path(raw_path)
+        if path.is_absolute():
+            return path.resolve()
+
+        candidates = [(Path.cwd() / path).resolve(), (REPO_ROOT / path).resolve()]
+        candidates.extend((parent / path).resolve() for parent in Path.cwd().resolve().parents)
+
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+
+        return (REPO_ROOT / path).resolve()
 
     @staticmethod
     def _build_test_failure_explanation(tool_result: dict) -> dict:

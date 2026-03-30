@@ -3,7 +3,7 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "completed",
-  "current_step": "Fixed the analyze-log CI failure by resolving relative log paths against the repository root and added coverage for changed pytest working directories.",
+  "current_step": "Hardened analyze-log path resolution for CI by resolving relative paths from the current working tree upward until the fixture is found.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -31,8 +31,9 @@
     "Integrated logging into the CLI and orchestrator runtime path with test coverage.",
     "Added a minimal GitHub Actions workflow for pytest on push and pull requests.",
     "Hardened the CI workflow by exporting Python's scripts directory to PATH before running pytest.",
-    "Fixed the analyze-log use case for GitHub Actions by resolving relative fixture paths against the repository root before invoking the existing safe CLI command.",
-    "Added end-to-end coverage for analyze-log execution when pytest changes the process working directory."
+    "Fixed the analyze-log use case for GitHub Actions by resolving relative fixture paths from the working tree upward before invoking the existing safe CLI command.",
+    "Added end-to-end coverage for analyze-log execution when pytest changes the process working directory.",
+    "Hardened analyze-log path lookup so editable-install import locations and shifted working directories both resolve the fixture consistently."
   ],
   "pending_steps": [],
   "known_blockers": [],
