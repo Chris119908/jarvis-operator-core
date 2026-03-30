@@ -3,11 +3,13 @@ from __future__ import annotations
 from jarvis_operator.config import AppConfig
 from jarvis_operator.tools.registry import ToolRegistry
 from jarvis_operator.tools.safe_cli_run import SafeCLIRunner
+from jarvis_operator.validation.validator import Validator
 
 
 class Orchestrator:
     def __init__(self, tool_registry: ToolRegistry) -> None:
         self.tool_registry = tool_registry
+        self.validator = Validator()
 
     @classmethod
     def from_config(cls, config: AppConfig) -> "Orchestrator":
@@ -27,7 +29,12 @@ class Orchestrator:
             raise ValueError("No tool mapping for task")
 
         tool = self.tool_registry.get("safe_cli_run")
-        return tool.run(["echo", task], cwd=".")
+        tool_result = tool.run(["echo", task], cwd=".")
+        validation = self.validator.validate(tool_result)
+        return {
+            "tool_result": tool_result,
+            "validation": validation,
+        }
 
     def run_task(self, task: str) -> dict:
         return self.run(task)
