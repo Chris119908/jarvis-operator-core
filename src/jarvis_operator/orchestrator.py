@@ -12,6 +12,7 @@ from jarvis_operator.tools.safe_cli_run import SafeCLIRunner
 from jarvis_operator.validation.validator import Validator
 
 logger = logging.getLogger(__name__)
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Orchestrator:
@@ -59,7 +60,11 @@ class Orchestrator:
                 cwd=".",
             )
         elif task.startswith("analyze log "):
-            target = Path(task.removeprefix("analyze log ").strip()).resolve()
+            target = Path(task.removeprefix("analyze log ").strip())
+            if not target.is_absolute():
+                target = (REPO_ROOT / target).resolve()
+            else:
+                target = target.resolve()
             tool_result = tool.run(
                 [
                     "python",

@@ -6,7 +6,8 @@ Evidence captured:
 - `.github/workflows/tests.yml`
 - workflow steps aligned with `pyproject.toml`
 - Python's scripts directory is exported to `PATH` before pytest runs
-- `analyze log` now resolves the fixture path before invoking the existing safe CLI command
+- `analyze log` now resolves relative fixture paths against the repository root before invoking the existing safe CLI command
+- the changed-working-directory case is now covered by an E2E test
 
 Validation result:
 - workflow uses `python -m pip install -e .`
