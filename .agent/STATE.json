@@ -1,9 +1,9 @@
 {
   "project_name": "jarvis-operator-core",
-  "version_target": "v1",
-  "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
+  "version_target": "v2.1",
+  "current_goal": "Introduce structured decision-making with deterministic decision models and a mock decision engine while preserving V1 behavior.",
   "current_status": "completed",
-  "current_step": "Resolved the remaining analyze-log CI failure by adding the missing tracked fixture file that GitHub lacked because it was matched by `.gitignore`.",
+  "current_step": "Completed the initial V2 decision layer: structured decision models, mock and LLM decision engines, orchestrator integration, and one bounded deterministic recovery step.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -35,13 +35,22 @@
     "Added end-to-end coverage for analyze-log execution when pytest changes the process working directory.",
     "Updated config loading and the orchestrator so relative workspace settings are normalized against the config location and tool calls run from that stable workspace root.",
     "Removed the CI-fragile nested Python subprocess from the analyze-log use case and now parse the resolved log file directly in the orchestrator.",
-    "Identified that `fixtures/logs/sample_error.log` was not tracked because `.gitignore` matched `logs/`, and prepared the missing fixture for GitHub CI."
+    "Identified that `fixtures/logs/sample_error.log` was not tracked because `.gitignore` matched `logs/`, and prepared the missing fixture for GitHub CI.",
+    "Defined the initial V2.1 structured decision models for tool_call, reject, and needs_human_input with unit tests.",
+    "Implemented BaseDecisionEngine and a deterministic MockDecisionEngine for the current V1 task patterns with unit tests.",
+    "Integrated the mock decision engine into the orchestrator for safe_cli_run-backed tasks and kept the current V1 behavior green under integration and full-suite tests.",
+    "Implemented a minimal LLMDecisionEngine that validates structured provider output and safely rejects invalid or unsupported decisions."
+    ,
+    "Selected MockDecisionEngine or LLMDecisionEngine from the orchestrator config path based on the configured provider.",
+    "Introduced one bounded deterministic recovery attempt after failed decision-based tool execution with integration coverage."
   ],
   "pending_steps": [],
   "known_blockers": [],
   "created_artifacts": [
-    "tests/unit/test_cli.py"
+    "tests/unit/test_cli.py",
+    "tests/unit/test_models.py",
+    "tests/unit/test_decision_engine.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "passed locally: python -m pytest tests/e2e/test_analyze_log.py; python -m pytest tests; GitHub root cause identified as missing tracked fixture file"
+  "last_validation_status": "passed: python -m pytest tests/integration/test_orchestrator.py tests/unit/test_decision_engine.py; python -m pytest tests"
 }
