@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -9,6 +11,8 @@ def test_load_config_with_valid_config():
 
     assert config.provider.type == "mock"
     assert "python" in config.tools.safe_cli.allowed_commands
+    assert Path(config.runtime.workspace_root).is_absolute()
+    assert all(Path(workspace).is_absolute() for workspace in config.tools.allowed_workspaces)
 
 
 def test_load_config_with_invalid_config(tmp_path):

@@ -12,17 +12,18 @@ from jarvis_operator.tools.safe_cli_run import SafeCLIRunner
 from jarvis_operator.validation.validator import Validator
 
 logger = logging.getLogger(__name__)
-REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Orchestrator:
-    def __init__(self, tool_registry: ToolRegistry, provider) -> None:
+    def __init__(self, tool_registry: ToolRegistry, provider, workspace_root: Path | None = None) -> None:
         self.tool_registry = tool_registry
         self.provider = provider
         self.validator = Validator()
+        self.workspace_root = workspace_root or Path.cwd().resolve()
 
     @classmethod
     def from_config(cls, config: AppConfig) -> "Orchestrator":
+        workspace_root = Path(config.runtime.workspace_root).resolve()
         registry = ToolRegistry()
         registry.register(
             "safe_cli_run",
@@ -47,7 +48,7 @@ class Orchestrator:
         else:
             raise NotImplementedError(f"Provider not yet implemented: {config.provider.type}")
 
-        return cls(registry, provider)
+        return cls(registry, provider, workspace_root=workspace_root)
 
     def run(self, task: str) -> dict:
         logger.info("Handling task: %s", task)
@@ -57,7 +58,7 @@ class Orchestrator:
             target = task.removeprefix("run tests ").strip()
             tool_result = tool.run(
                 ["python", "-m", "pytest", target],
-                cwd=".",
+                cwd=self.workspace_root,
             )
         elif task.startswith("analyze log "):
             target = self._resolve_repo_path(task.removeprefix("analyze log ").strip())
@@ -74,7 +75,7 @@ class Orchestrator:
                         "print(f'errors={len(errors)} warnings={len(warnings)}')"
                     ),
                 ],
-                cwd=".",
+                cwd=self.workspace_root,
             )
         elif task.startswith("create project "):
             target = task.removeprefix("create project ").strip()
@@ -94,7 +95,7 @@ class Orchestrator:
                         "print('project scaffold created')"
                     ),
                 ],
-                cwd=".",
+                cwd=self.workspace_root,
             )
         elif task.startswith("generate structure "):
             remainder = task.removeprefix("generate structure ").strip()
@@ -116,12 +117,12 @@ class Orchestrator:
                         "print('structure generated')"
                     ),
                 ],
-                cwd=".",
+                cwd=self.workspace_root,
             )
         elif "echo" in task:
             tool_result = tool.run(
                 ["python", "-c", f"print({task!r})"],
-                cwd=".",
+                cwd=self.workspace_root,
             )
         else:
             raise ValueError("No tool mapping for task")
@@ -139,20 +140,11 @@ class Orchestrator:
     def run_task(self, task: str) -> dict:
         return self.run(task)
 
-    @staticmethod
-    def _resolve_repo_path(raw_path: str) -> Path:
+    def _resolve_repo_path(self, raw_path: str) -> Path:
         path = Path(raw_path)
         if path.is_absolute():
             return path.resolve()
-
-        candidates = [(Path.cwd() / path).resolve(), (REPO_ROOT / path).resolve()]
-        candidates.extend((parent / path).resolve() for parent in Path.cwd().resolve().parents)
-
-        for candidate in candidates:
-            if candidate.exists():
-                return candidate
-
-        return (REPO_ROOT / path).resolve()
+        return (self.workspace_root / path).resolve()
 
     @staticmethod
     def _build_test_failure_explanation(tool_result: dict) -> dict:

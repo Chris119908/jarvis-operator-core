@@ -1,21 +1,16 @@
 # Summary
 
-The CI branch now includes the minimal pytest workflow plus the focused follow-up fix for the Ubuntu log-analysis failure.
+The analyze-log CI failure is now addressed by deriving the workspace root from the loaded config and using it consistently in the orchestrator.
 
 Evidence captured:
-- `.github/workflows/tests.yml`
-- workflow steps aligned with `pyproject.toml`
-- Python's scripts directory is exported to `PATH` before pytest runs
-- `analyze log` now resolves relative fixture paths by checking the current working tree and walking upward until the fixture is found
-- the changed-working-directory case is now covered by an E2E test
+- `src/jarvis_operator/config.py` now normalizes `runtime.workspace_root` and relative `tools.allowed_workspaces` against the config file location
+- `src/jarvis_operator/orchestrator.py` uses that stable workspace root for relative task paths and tool `cwd`
+- the changed-working-directory case remains covered by E2E tests
 
 Validation result:
-- workflow uses `python -m pip install -e .`
-- workflow exposes the installed console-script location to GitHub Actions
-- workflow runs `python -m pytest tests`
-- matrix covers Python `3.11` and `3.12`
 - `python -m pytest tests/e2e/test_analyze_log.py`
+- `python -m pytest tests/unit/test_config.py tests/integration/test_orchestrator.py`
 - `python -m pytest tests`
 
 Status:
-- branch updated with the focused CI fix path and the GitHub-reported failing test addressed
+- branch updated with the focused workspace-root fix for the analyze-log CI issue

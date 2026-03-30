@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from jarvis_operator.config import AppConfig
 from jarvis_operator.providers.mock_provider import MockProvider
 from jarvis_operator.providers.ollama_provider import OllamaProvider
@@ -41,12 +43,12 @@ def build_config(provider_type: str, model: str, base_url: str | None = None) ->
             },
             "runtime": {
                 "state_dir": ".agent",
-                "workspace_root": ".",
+                "workspace_root": str(REPO_ROOT),
                 "log_dir": "logs",
                 "log_level": "INFO",
             },
             "tools": {
-                "allowed_workspaces": ["."],
+                "allowed_workspaces": [str(REPO_ROOT)],
                 "safe_cli": {
                     "allowed_commands": ["python", "pytest", "echo", "ls", "dir"],
                     "default_timeout_seconds": 60,
@@ -80,7 +82,7 @@ def test_correct_tool_selection():
     assert tool.calls == [
         {
             "command": ["python", "-c", "print('echo hello')"],
-            "cwd": ".",
+            "cwd": REPO_ROOT,
         }
     ]
 
@@ -162,3 +164,14 @@ def test_from_config_selects_openai_compatible_provider():
 
     assert isinstance(orchestrator.provider, OpenAICompatibleProvider)
     assert orchestrator.provider.get_model_name() == "gpt-4o-mini"
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_from_config_uses_stable_workspace_root_when_cwd_changes(monkeypatch):
+    monkeypatch.chdir("tests")
+
+    orchestrator = Orchestrator.from_config(build_config("mock", "mock-model"))
+
+    assert orchestrator.workspace_root == REPO_ROOT

@@ -3,7 +3,7 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "completed",
-  "current_step": "Hardened analyze-log path resolution for CI by resolving relative paths from the current working tree upward until the fixture is found.",
+  "current_step": "Stabilized analyze-log execution by deriving a fixed workspace root from the loaded config and using it for relative task paths and tool cwd.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -31,9 +31,9 @@
     "Integrated logging into the CLI and orchestrator runtime path with test coverage.",
     "Added a minimal GitHub Actions workflow for pytest on push and pull requests.",
     "Hardened the CI workflow by exporting Python's scripts directory to PATH before running pytest.",
-    "Fixed the analyze-log use case for GitHub Actions by resolving relative fixture paths from the working tree upward before invoking the existing safe CLI command.",
+    "Fixed the analyze-log use case for GitHub Actions by resolving relative task paths from the config-derived workspace root before invoking the existing safe CLI command.",
     "Added end-to-end coverage for analyze-log execution when pytest changes the process working directory.",
-    "Hardened analyze-log path lookup so editable-install import locations and shifted working directories both resolve the fixture consistently."
+    "Updated config loading and the orchestrator so relative workspace settings are normalized against the config location and tool calls run from that stable workspace root."
   ],
   "pending_steps": [],
   "known_blockers": [],
@@ -41,5 +41,5 @@
     "tests/unit/test_cli.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "passed: python -m pytest tests/e2e/test_analyze_log.py; python -m pytest tests"
+  "last_validation_status": "passed: python -m pytest tests/e2e/test_analyze_log.py; python -m pytest tests/unit/test_config.py tests/integration/test_orchestrator.py; python -m pytest tests"
 }
