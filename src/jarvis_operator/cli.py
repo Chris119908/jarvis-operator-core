@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 import argparse
+import logging
 
 from jarvis_operator.config import load_config
+from jarvis_operator.logging_setup import configure_logging
 from jarvis_operator.orchestrator import Orchestrator
+
+logger = logging.getLogger(__name__)
 
 
 def cmd_doctor(config_path: str) -> int:
     config = load_config(config_path)
+    configure_logging(config.runtime.log_level)
+    logger.info("Running doctor command")
     print("Jarvis Operator doctor check")
     print(f"Provider: {config.provider.type}")
     print(f"State dir: {config.runtime.state_dir}")
@@ -16,6 +22,8 @@ def cmd_doctor(config_path: str) -> int:
 
 def cmd_run(task: str, config_path: str) -> int:
     config = load_config(config_path)
+    configure_logging(config.runtime.log_level)
+    logger.info("Running task via CLI")
     orchestrator = Orchestrator.from_config(config)
     result = orchestrator.run_task(task)
     print(result)

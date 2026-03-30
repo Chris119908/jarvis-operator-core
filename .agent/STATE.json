@@ -3,26 +3,42 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "in_progress",
-  "current_step": "Config loading is implemented with validation for valid, invalid, and missing config files.",
+  "current_step": "Logging is now integrated into the CLI and orchestrator runtime path with automated coverage.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
     "Hardened config loading for empty YAML input and expanded config loading tests.",
-    "Completed Issue #1 for robust config loading with unit tests for valid, invalid, and missing config files."
+    "Completed Issue #1 for robust config loading with unit tests for valid, invalid, and missing config files.",
+    "Validated MockProvider with deterministic unit tests for health_check, generate_text, generate_structured, and get_model_name.",
+    "Completed Issue #3 by validating safe_cli_run behavior and safety constraints with unit tests.",
+    "Completed Issue #4 by implementing a minimal ToolRegistry and validating safe_cli_run integration through the registry.",
+    "Completed Issue #5 by implementing a minimal orchestrator that routes echo tasks through ToolRegistry to safe_cli_run.",
+    "Completed Issue #6 by implementing a minimal validator for tool results with unit tests.",
+    "Completed Issue #7 by integrating validator output into the orchestrator result flow.",
+    "Reconciled stale integration expectations and made orchestrator execution path pass the broader unit, integration, and smoke test subset.",
+    "Verified StateStore returns an empty dict when STATE.json is missing.",
+    "Verified StateStore raises JSONDecodeError for broken STATE.json.",
+    "Validated the current unit, integration, and smoke subset with all tests passing.",
+    "Implemented the first real V1 end-to-end use case for running tests through the orchestrator.",
+    "Implemented a second real V1 end-to-end use case for analyzing log files through the orchestrator.",
+    "Implemented real end-to-end coverage for project scaffold creation and structure generation from a specification.",
+    "Validated the complete test suite with all tests passing.",
+    "Added lightweight tests for the current Ollama and OpenAI-compatible provider placeholders.",
+    "Verified the documented install-target commands through smoke tests for the console script.",
+    "Implemented a minimal tested OllamaProvider with clear connectivity and generation behavior.",
+    "Implemented a minimal tested OpenAI-compatible provider with clear connectivity and generation behavior.",
+    "Wired configured provider selection into the orchestrator runtime path with coverage for mock, ollama, and openai_compatible.",
+    "Integrated logging into the CLI and orchestrator runtime path with test coverage."
   ],
   "pending_steps": [
-    "Verify StateStore behavior for missing STATE.json with tests",
-    "Implement mock LLM provider",
-    "Implement state store",
-    "Implement tool registry and safe_cli_run",
-    "Implement CLI entrypoint",
-    "Add tests",
-    "Run smoke checks"
+    "Assess remaining V1 definition-of-done gaps",
+    "Assess tool-contract gaps for read_file, write_file, and list_dir",
+    "Re-evaluate the remaining V1 definition-of-done gaps after logging coverage"
   ],
   "known_blockers": [],
   "created_artifacts": [
     "tests/unit/test_cli.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "passed: python -m pytest tests/unit/test_config.py"
+  "last_validation_status": "passed: python -m pytest tests"
 }

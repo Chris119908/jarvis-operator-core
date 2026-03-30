@@ -1,7 +1,9 @@
 # Next Action
 
-Verify the `state_store` contract for the smallest missing case:
+Close the next smallest remaining V1 gap with tests:
 
-- add a unit test proving `StateStore.load_state()` returns an empty dict when `STATE.json` is missing
-- run the relevant unit tests
+- bring `read_file`, `write_file`, and `list_dir` closer to their documented tool contracts
+- keep changes minimal and directly backed by tests
+- focus first on the smallest missing contract behavior
 - update `.agent/STATE.json`, `.agent/SUMMARY.md`, and `.agent/NEXT_ACTION.md`
+- record unresolved failures in `.agent/KNOWN_ISSUES.md` if any appear

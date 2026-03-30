@@ -1,13 +1,16 @@
 # Summary
 
-Current iteration completed Issue #1 for config loading without expanding scope.
+Current iteration added minimal logging coverage to the real runtime path.
 
 Evidence captured:
-- `src/jarvis_operator/config.py`
-- `tests/unit/test_config.py`
+- `src/jarvis_operator/cli.py`
+- `src/jarvis_operator/orchestrator.py`
+- `tests/unit/test_cli.py`
+- `tests/integration/test_orchestrator.py`
 
 Validation result:
-- `python -m pytest tests/unit/test_config.py`
+- `python -m pytest tests/unit/test_cli.py tests/integration/test_orchestrator.py`
+- `python -m pytest tests`
 
 Current focus:
 - keep progressing in the smallest tested increments
