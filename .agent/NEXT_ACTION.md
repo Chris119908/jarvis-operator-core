@@ -1,1 +1,1 @@
-Config-root and argument-passing fix applied for analyze-log CI issue. Confirm PR #12 checks go green.
+Config-root and direct log parsing fix applied for analyze-log CI issue. Confirm PR #13 checks go green.

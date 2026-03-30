@@ -3,7 +3,7 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "completed",
-  "current_step": "Stabilized analyze-log execution by deriving a fixed workspace root from the loaded config and passing the resolved log path as a separate Python argument in the tool call.",
+  "current_step": "Stabilized analyze-log execution by deriving a fixed workspace root from the loaded config and handling log parsing directly in the orchestrator.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -34,7 +34,7 @@
     "Fixed the analyze-log use case for GitHub Actions by resolving relative task paths from the config-derived workspace root before invoking the existing safe CLI command.",
     "Added end-to-end coverage for analyze-log execution when pytest changes the process working directory.",
     "Updated config loading and the orchestrator so relative workspace settings are normalized against the config location and tool calls run from that stable workspace root.",
-    "Hardened the analyze-log tool invocation by passing the resolved log path as a dedicated subprocess argument instead of interpolating it into the inline Python code."
+    "Removed the CI-fragile nested Python subprocess from the analyze-log use case and now parse the resolved log file directly in the orchestrator."
   ],
   "pending_steps": [],
   "known_blockers": [],
