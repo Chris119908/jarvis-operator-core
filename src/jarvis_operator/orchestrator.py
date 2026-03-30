@@ -12,7 +12,6 @@ from jarvis_operator.tools.safe_cli_run import SafeCLIRunner
 from jarvis_operator.validation.validator import Validator
 
 logger = logging.getLogger(__name__)
-REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Orchestrator:
@@ -20,20 +19,17 @@ class Orchestrator:
         self.tool_registry = tool_registry
         self.provider = provider
         self.validator = Validator()
-        self.workspace_root = workspace_root or REPO_ROOT
+        self.workspace_root = workspace_root or Path.cwd().resolve()
 
     @classmethod
     def from_config(cls, config: AppConfig) -> "Orchestrator":
-        workspace_root = cls._resolve_workspace_root(config.runtime.workspace_root)
+        workspace_root = Path(config.runtime.workspace_root).resolve()
         registry = ToolRegistry()
         registry.register(
             "safe_cli_run",
             SafeCLIRunner(
                 allowed_commands=config.tools.safe_cli.allowed_commands,
-                allowed_workspaces=[
-                    str(cls._resolve_allowed_workspace(workspace_root, workspace))
-                    for workspace in config.tools.allowed_workspaces
-                ],
+                allowed_workspaces=config.tools.allowed_workspaces,
                 default_timeout_seconds=config.tools.safe_cli.default_timeout_seconds,
             ),
         )
@@ -143,20 +139,6 @@ class Orchestrator:
 
     def run_task(self, task: str) -> dict:
         return self.run(task)
-
-    @classmethod
-    def _resolve_workspace_root(cls, raw_root: str) -> Path:
-        root = Path(raw_root)
-        if root.is_absolute():
-            return root.resolve()
-        return (REPO_ROOT / root).resolve()
-
-    @staticmethod
-    def _resolve_allowed_workspace(workspace_root: Path, raw_workspace: str) -> Path:
-        workspace = Path(raw_workspace)
-        if workspace.is_absolute():
-            return workspace.resolve()
-        return (workspace_root / workspace).resolve()
 
     def _resolve_repo_path(self, raw_path: str) -> Path:
         path = Path(raw_path)

@@ -36,7 +36,7 @@ class AppConfig(BaseModel):
 
 
 def load_config(path: str | Path) -> AppConfig:
-    config_path = Path(path)
+    config_path = Path(path).resolve()
     if not config_path.exists():
         raise FileNotFoundError(f"Config file not found: {config_path}")
 
@@ -45,5 +45,24 @@ def load_config(path: str | Path) -> AppConfig:
 
     if not isinstance(raw, dict):
         raise ValueError("Config file must contain a YAML mapping.")
+
+    config_root = config_path.parent
+    runtime = raw.get("runtime", {})
+    tools = raw.get("tools", {})
+
+    runtime_workspace_root = Path(runtime.get("workspace_root", "."))
+    if not runtime_workspace_root.is_absolute():
+        runtime["workspace_root"] = str((config_root / runtime_workspace_root).resolve())
+
+    normalized_allowed_workspaces: list[str] = []
+    for workspace in tools.get("allowed_workspaces", []):
+        workspace_path = Path(workspace)
+        if workspace_path.is_absolute():
+            normalized_allowed_workspaces.append(str(workspace_path.resolve()))
+        else:
+            normalized_allowed_workspaces.append(
+                str((config_root / workspace_path).resolve())
+            )
+    tools["allowed_workspaces"] = normalized_allowed_workspaces
 
     return AppConfig.model_validate(raw)

@@ -43,12 +43,12 @@ def build_config(provider_type: str, model: str, base_url: str | None = None) ->
             },
             "runtime": {
                 "state_dir": ".agent",
-                "workspace_root": ".",
+                "workspace_root": str(REPO_ROOT),
                 "log_dir": "logs",
                 "log_level": "INFO",
             },
             "tools": {
-                "allowed_workspaces": ["."],
+                "allowed_workspaces": [str(REPO_ROOT)],
                 "safe_cli": {
                     "allowed_commands": ["python", "pytest", "echo", "ls", "dir"],
                     "default_timeout_seconds": 60,
