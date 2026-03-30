@@ -3,7 +3,7 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "in_progress",
-  "current_step": "StateStore behavior for missing STATE.json is now explicitly verified by passing unit tests.",
+  "current_step": "StateStore behavior for broken STATE.json is now explicitly verified by passing unit tests.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -16,10 +16,10 @@
     "Completed Issue #6 by implementing a minimal validator for tool results with unit tests.",
     "Completed Issue #7 by integrating validator output into the orchestrator result flow.",
     "Reconciled stale integration expectations and made orchestrator execution path pass the broader unit, integration, and smoke test subset.",
-    "Verified StateStore returns an empty dict when STATE.json is missing."
+    "Verified StateStore returns an empty dict when STATE.json is missing.",
+    "Verified StateStore raises JSONDecodeError for broken STATE.json."
   ],
   "pending_steps": [
-    "Verify StateStore raises JSONDecodeError for broken STATE.json with tests",
     "Add tests",
     "Run smoke checks"
   ],

@@ -1,7 +1,8 @@
 # Next Action
 
-Verify the next smallest `state_store` contract case:
+Run the broader automated evidence already expected by the repository:
 
-- add a unit test proving `StateStore.load_state()` raises `JSONDecodeError` for a broken `STATE.json`
-- run the relevant unit tests
+- run `python -m pytest tests/unit tests/integration tests/smoke`
+- record the validation result
 - update `.agent/STATE.json`, `.agent/SUMMARY.md`, and `.agent/NEXT_ACTION.md`
+- if failures remain, record them in `.agent/KNOWN_ISSUES.md`

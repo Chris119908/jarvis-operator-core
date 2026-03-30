@@ -1,6 +1,6 @@
 # Summary
 
-Current iteration completed the smallest missing StateStore contract check.
+Current iteration completed the next smallest StateStore contract check.
 
 Evidence captured:
 - `src/jarvis_operator/state/store.py`
