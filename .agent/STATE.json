@@ -2,8 +2,8 @@
   "project_name": "jarvis-operator-core",
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
-  "current_status": "in_progress",
-  "current_step": "Logging is now integrated into the CLI and orchestrator runtime path with automated coverage.",
+  "current_status": "completed",
+  "current_step": "V1 completed. Ready for review or next phase.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -30,15 +30,11 @@
     "Wired configured provider selection into the orchestrator runtime path with coverage for mock, ollama, and openai_compatible.",
     "Integrated logging into the CLI and orchestrator runtime path with test coverage."
   ],
-  "pending_steps": [
-    "Assess remaining V1 definition-of-done gaps",
-    "Assess tool-contract gaps for read_file, write_file, and list_dir",
-    "Re-evaluate the remaining V1 definition-of-done gaps after logging coverage"
-  ],
+  "pending_steps": [],
   "known_blockers": [],
   "created_artifacts": [
     "tests/unit/test_cli.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "passed: python -m pytest tests"
+  "last_validation_status": "passed: python -m pytest tests/unit; python -m pytest tests/integration; python -m pytest tests/e2e; python -m pytest tests/smoke; python -m pytest tests"
 }

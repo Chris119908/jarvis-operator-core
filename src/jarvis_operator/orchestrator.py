@@ -126,10 +126,34 @@ class Orchestrator:
 
         validation = self.validator.validate(tool_result)
         logger.info("Task validation success=%s", validation["success"])
-        return {
+        result = {
             "tool_result": tool_result,
             "validation": validation,
         }
+        if task.startswith("run tests ") and not validation["success"]:
+            result["failure_explanation"] = self._build_test_failure_explanation(tool_result)
+        return result
 
     def run_task(self, task: str) -> dict:
         return self.run(task)
+
+    @staticmethod
+    def _build_test_failure_explanation(tool_result: dict) -> dict:
+        combined_output = f"{tool_result.get('stdout', '')}\n{tool_result.get('stderr', '')}"
+        for line in combined_output.splitlines():
+            stripped = line.strip()
+            if stripped and (
+                "FAILED" in stripped
+                or "AssertionError" in stripped
+                or stripped.startswith("E ")
+            ):
+                return {
+                    "success": False,
+                    "summary": "Test failure detected",
+                    "details": stripped[:200],
+                }
+        return {
+            "success": False,
+            "summary": "Test failure detected",
+            "details": combined_output.strip()[:200],
+        }

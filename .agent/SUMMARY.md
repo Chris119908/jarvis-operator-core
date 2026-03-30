@@ -1,18 +1,23 @@
 # Summary
 
-Current iteration added minimal logging coverage to the real runtime path.
+V1 completed. Ready for review or next phase.
 
 Evidence captured:
-- `src/jarvis_operator/cli.py`
-- `src/jarvis_operator/orchestrator.py`
-- `tests/unit/test_cli.py`
-- `tests/integration/test_orchestrator.py`
+- all 4 fixed V1 use cases covered by real E2E tests
+- CLI install path covered by smoke tests
+- tool, validator, provider, integration, smoke, and E2E coverage all passing
 
-Validation result:
-- `python -m pytest tests/unit/test_cli.py tests/integration/test_orchestrator.py`
+Final validation result:
+- `python -m pytest tests/unit`
+- `python -m pytest tests/integration`
+- `python -m pytest tests/e2e`
+- `python -m pytest tests/smoke`
 - `python -m pytest tests`
 
-Current focus:
-- keep progressing in the smallest tested increments
-- align implementation with tool contracts
-- avoid scope expansion beyond the v1 docs
+Definition-of-done status:
+- all 4 use cases functioning
+- CLI functioning
+- tools functioning
+- validator functioning
+- full automated suite green
+- no known critical gaps remain for V1
