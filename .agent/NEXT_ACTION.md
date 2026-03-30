@@ -1,1 +1,1 @@
-CI path-resolution hardening pushed with regression coverage. Confirm PR #11 checks go green.
+Workspace-root fix applied for analyze-log CI issue. Confirm PR #11 checks go green.
