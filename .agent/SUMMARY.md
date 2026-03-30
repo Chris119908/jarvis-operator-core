@@ -1,13 +1,13 @@
 # Summary
 
-Current iteration completed Issue #1 for config loading without expanding scope.
+Current iteration validated the MockProvider without expanding scope.
 
 Evidence captured:
-- `src/jarvis_operator/config.py`
-- `tests/unit/test_config.py`
+- `src/jarvis_operator/providers/mock_provider.py`
+- `tests/unit/test_mock_provider.py`
 
 Validation result:
-- `python -m pytest tests/unit/test_config.py`
+- `python -m pytest tests/unit/test_mock_provider.py`
 
 Current focus:
 - keep progressing in the smallest tested increments
