@@ -1,15 +1,12 @@
 # Summary
 
-Current iteration completed the remaining baseline test coverage for the initial project setup.
+Current iteration tightened config loading without expanding scope.
 
 Evidence captured:
 - `tests/unit/test_config.py`
-- `tests/unit/test_cli.py`
-- `tests/integration/test_cli_run_flow.py`
 
 Validation result:
-- `python -m pytest tests/unit/test_config.py tests/unit/test_cli.py`
-- `python -m pytest tests/integration/test_cli_run_flow.py`
+- `python -m pytest tests/unit/test_config.py`
 
 Current focus:
 - keep progressing in the smallest tested increments

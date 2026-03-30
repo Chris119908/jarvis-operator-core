@@ -39,4 +39,6 @@ def load_config(path: str | Path) -> AppConfig:
     config_path = Path(path)
     with config_path.open("r", encoding="utf-8") as f:
         raw = yaml.safe_load(f)
+    if not isinstance(raw, dict):
+        raise ValueError("Config file must contain a YAML mapping.")
     return AppConfig.model_validate(raw)
