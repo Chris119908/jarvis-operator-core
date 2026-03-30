@@ -67,13 +67,15 @@ class Orchestrator:
                     "python",
                     "-c",
                     (
+                        "import sys; "
                         "from pathlib import Path; "
-                        f"text=Path({target.as_posix()!r}).read_text(encoding='utf-8'); "
+                        "text=Path(sys.argv[1]).read_text(encoding='utf-8'); "
                         "lines=text.splitlines(); "
                         "errors=[line for line in lines if 'ERROR' in line]; "
                         "warnings=[line for line in lines if 'WARNING' in line]; "
                         "print(f'errors={len(errors)} warnings={len(warnings)}')"
                     ),
+                    str(target),
                 ],
                 cwd=self.workspace_root,
             )
