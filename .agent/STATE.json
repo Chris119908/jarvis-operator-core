@@ -1,9 +1,9 @@
 {
   "project_name": "jarvis-operator-core",
-  "version_target": "v2.1",
-  "current_goal": "Introduce structured decision-making with deterministic decision models and a mock decision engine while preserving V1 behavior.",
+  "version_target": "v2.2",
+  "current_goal": "Harden structured LLM decision handling while preserving the V2 decision-layer architecture and V1 execution guarantees.",
   "current_status": "completed",
-  "current_step": "Completed the initial V2 decision layer and added integration proof that LLMDecisionEngine decisions execute and reject safely through the orchestrator.",
+  "current_step": "Completed the first V2.2 hardening step: LLMDecisionEngine now rejects non-object outputs, unregistered tools, and malformed safe_cli_run arguments deterministically.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -43,7 +43,8 @@
     ,
     "Selected MockDecisionEngine or LLMDecisionEngine from the orchestrator config path based on the configured provider.",
     "Introduced one bounded deterministic recovery attempt after failed decision-based tool execution with integration coverage.",
-    "Added orchestrator integration coverage for successful and invalid LLMDecisionEngine decisions."
+    "Added orchestrator integration coverage for successful and invalid LLMDecisionEngine decisions.",
+    "Hardened LLMDecisionEngine to reject non-object outputs, unregistered tools, and malformed safe_cli_run arguments with dedicated unit coverage."
   ],
   "pending_steps": [],
   "known_blockers": [],
@@ -53,5 +54,5 @@
     "tests/unit/test_decision_engine.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "passed: python -m pytest tests/integration/test_orchestrator.py; python -m pytest tests"
+  "last_validation_status": "passed: python -m pytest tests/unit/test_decision_engine.py; python -m pytest tests"
 }

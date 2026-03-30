@@ -5,10 +5,10 @@ from jarvis_operator.models import RejectDecision, ToolCallDecision
 
 
 class StubProvider:
-    def __init__(self, payload: dict) -> None:
+    def __init__(self, payload) -> None:
         self.payload = payload
 
-    def generate_structured(self, prompt: str, schema: dict) -> dict:
+    def generate_structured(self, prompt: str, schema: dict):
         return self.payload
 
 
@@ -75,6 +75,72 @@ def test_llm_decision_engine_rejects_invalid_payload():
                 "decision_type": "tool_call",
                 "confidence": 0.9,
                 "explanation": "Missing required fields.",
+            }
+        )
+    )
+
+    decision = engine.decide("run tests tests", workspace_root=Path(".").resolve())
+
+    assert isinstance(decision, RejectDecision)
+    assert decision.reason == "Invalid decision output."
+
+
+def test_llm_decision_engine_rejects_non_object_payload():
+    engine = LLMDecisionEngine(StubProvider("not-a-dict"))
+
+    decision = engine.decide("run tests tests", workspace_root=Path(".").resolve())
+
+    assert isinstance(decision, RejectDecision)
+    assert decision.reason == "Invalid decision output."
+
+
+def test_llm_decision_engine_rejects_unregistered_tool():
+    engine = LLMDecisionEngine(
+        StubProvider(
+            {
+                "decision_type": "tool_call",
+                "tool_name": "write_file",
+                "arguments": {"command": ["python", "-m", "pytest"], "cwd": "."},
+                "confidence": 0.9,
+                "explanation": "Use another tool.",
+            }
+        )
+    )
+
+    decision = engine.decide("run tests tests", workspace_root=Path(".").resolve())
+
+    assert isinstance(decision, RejectDecision)
+    assert decision.reason == "Invalid decision output."
+
+
+def test_llm_decision_engine_rejects_invalid_command_arguments():
+    engine = LLMDecisionEngine(
+        StubProvider(
+            {
+                "decision_type": "tool_call",
+                "tool_name": "safe_cli_run",
+                "arguments": {"command": "python -m pytest", "cwd": "."},
+                "confidence": 0.9,
+                "explanation": "Run tests.",
+            }
+        )
+    )
+
+    decision = engine.decide("run tests tests", workspace_root=Path(".").resolve())
+
+    assert isinstance(decision, RejectDecision)
+    assert decision.reason == "Invalid decision output."
+
+
+def test_llm_decision_engine_rejects_blank_cwd():
+    engine = LLMDecisionEngine(
+        StubProvider(
+            {
+                "decision_type": "tool_call",
+                "tool_name": "safe_cli_run",
+                "arguments": {"command": ["python", "-m", "pytest"], "cwd": "  "},
+                "confidence": 0.9,
+                "explanation": "Run tests.",
             }
         )
     )

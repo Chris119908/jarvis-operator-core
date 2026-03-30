@@ -150,11 +150,14 @@ class LLMDecisionEngine(BaseDecisionEngine):
             f"Task: {task}"
         )
         raw = self.provider.generate_structured(prompt, schema)
+        if not isinstance(raw, dict):
+            return self._invalid_output("The decision engine rejected non-object structured provider output.")
         decision_type = raw.get("decision_type")
 
         try:
             if decision_type == "tool_call":
-                return ToolCallDecision.model_validate(raw)
+                decision = ToolCallDecision.model_validate(raw)
+                return self._validate_tool_call(decision)
             if decision_type == "reject":
                 return RejectDecision.model_validate(raw)
             if decision_type == "needs_human_input":
@@ -165,16 +168,41 @@ class LLMDecisionEngine(BaseDecisionEngine):
                     explanation=validated.explanation,
                 )
         except ValidationError:
-            return RejectDecision(
-                reason="Invalid decision output.",
-                confidence=1.0,
-                explanation="The decision engine rejected invalid structured provider output.",
+            return self._invalid_output(
+                "The decision engine rejected invalid structured provider output."
             )
 
+        return self._invalid_output(
+            "The decision engine rejected unsupported structured provider output."
+        )
+
+    @staticmethod
+    def _validate_tool_call(decision: ToolCallDecision) -> ToolCallDecision | RejectDecision:
+        if decision.tool_name != "safe_cli_run":
+            return LLMDecisionEngine._invalid_output(
+                "The decision engine rejected an unregistered tool."
+            )
+
+        command = decision.arguments.get("command")
+        cwd = decision.arguments.get("cwd")
+        if not isinstance(command, list) or not command or not all(
+            isinstance(part, str) and part for part in command
+        ):
+            return LLMDecisionEngine._invalid_output(
+                "The decision engine rejected a tool call with an invalid command."
+            )
+        if not isinstance(cwd, str) or not cwd.strip():
+            return LLMDecisionEngine._invalid_output(
+                "The decision engine rejected a tool call with an invalid cwd."
+            )
+        return decision
+
+    @staticmethod
+    def _invalid_output(explanation: str) -> RejectDecision:
         return RejectDecision(
             reason="Invalid decision output.",
             confidence=1.0,
-            explanation="The decision engine rejected unsupported structured provider output.",
+            explanation=explanation,
         )
 
     def decide_recovery(
