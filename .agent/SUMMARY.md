@@ -1,14 +1,13 @@
 # Summary
 
-Current iteration closed the next smallest remaining V1 gap with provider placeholder tests.
+Current iteration verified the documented install-target behavior with smoke coverage.
 
 Evidence captured:
-- `src/jarvis_operator/providers/ollama_provider.py`
-- `src/jarvis_operator/providers/openai_compatible_provider.py`
-- `tests/unit/test_provider_placeholders.py`
+- `tests/smoke/test_smoke.py`
 
 Validation result:
-- `python -m pytest tests/unit/test_provider_placeholders.py`
+- `python -m pytest tests/smoke/test_smoke.py`
+- `python -m pytest tests`
 
 Current focus:
 - keep progressing in the smallest tested increments
