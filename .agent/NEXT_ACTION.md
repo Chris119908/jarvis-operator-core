@@ -1,1 +1,1 @@
-CI reliability fix applied. Re-run GitHub Actions checks on PR #11.
+CI follow-up fix pushed. Confirm PR #11 checks go green.

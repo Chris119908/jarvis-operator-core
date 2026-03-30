@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 from jarvis_operator.config import AppConfig
 from jarvis_operator.providers.mock_provider import MockProvider
@@ -58,14 +59,14 @@ class Orchestrator:
                 cwd=".",
             )
         elif task.startswith("analyze log "):
-            target = task.removeprefix("analyze log ").strip()
+            target = Path(task.removeprefix("analyze log ").strip()).resolve()
             tool_result = tool.run(
                 [
                     "python",
                     "-c",
                     (
                         "from pathlib import Path; "
-                        f"text=Path({target!r}).read_text(encoding='utf-8'); "
+                        f"text=Path({target.as_posix()!r}).read_text(encoding='utf-8'); "
                         "lines=text.splitlines(); "
                         "errors=[line for line in lines if 'ERROR' in line]; "
                         "warnings=[line for line in lines if 'WARNING' in line]; "
