@@ -3,7 +3,7 @@
   "version_target": "v2.2",
   "current_goal": "Harden structured LLM decision handling while preserving the V2 decision-layer architecture and V1 execution guarantees.",
   "current_status": "completed",
-  "current_step": "Completed the first V2.2 hardening step: LLMDecisionEngine now rejects non-object outputs, unregistered tools, and malformed safe_cli_run arguments deterministically.",
+  "current_step": "Completed the next V2.2 step: LLMDecisionEngine now supports one provider-backed bounded recovery decision path with the same strict structured-output validation.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -44,7 +44,8 @@
     "Selected MockDecisionEngine or LLMDecisionEngine from the orchestrator config path based on the configured provider.",
     "Introduced one bounded deterministic recovery attempt after failed decision-based tool execution with integration coverage.",
     "Added orchestrator integration coverage for successful and invalid LLMDecisionEngine decisions.",
-    "Hardened LLMDecisionEngine to reject non-object outputs, unregistered tools, and malformed safe_cli_run arguments with dedicated unit coverage."
+    "Hardened LLMDecisionEngine to reject non-object outputs, unregistered tools, and malformed safe_cli_run arguments with dedicated unit coverage.",
+    "Added one bounded provider-backed recovery decision path in LLMDecisionEngine with unit coverage for valid and invalid follow-up outputs."
   ],
   "pending_steps": [],
   "known_blockers": [],

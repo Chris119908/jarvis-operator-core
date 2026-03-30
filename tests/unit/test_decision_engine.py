@@ -6,10 +6,16 @@ from jarvis_operator.models import RejectDecision, ToolCallDecision
 
 class StubProvider:
     def __init__(self, payload) -> None:
-        self.payload = payload
+        if isinstance(payload, list):
+            self.payloads = payload
+        else:
+            self.payloads = [payload]
+        self.calls: list[dict] = []
 
     def generate_structured(self, prompt: str, schema: dict):
-        return self.payload
+        self.calls.append({"prompt": prompt, "schema": schema})
+        index = min(len(self.calls) - 1, len(self.payloads) - 1)
+        return self.payloads[index]
 
 
 def test_mock_decision_engine_returns_tool_call_for_run_tests():
@@ -167,3 +173,48 @@ def test_llm_decision_engine_converts_needs_human_input_to_reject():
 
     assert isinstance(decision, RejectDecision)
     assert decision.reason == "Which directory should be scanned?"
+
+
+def test_llm_decision_engine_accepts_valid_recovery_tool_call():
+    provider = StubProvider(
+        {
+            "decision_type": "tool_call",
+            "tool_name": "safe_cli_run",
+            "arguments": {"command": ["python", "-m", "pytest", "tests"], "cwd": "."},
+            "confidence": 0.7,
+            "explanation": "Retry the requested tests once.",
+        }
+    )
+    engine = LLMDecisionEngine(provider)
+
+    decision = engine.decide_recovery(
+        "run tests tests",
+        workspace_root=Path(".").resolve(),
+        tool_result={"returncode": 1, "stderr": "FAILED test_example"},
+    )
+
+    assert isinstance(decision, ToolCallDecision)
+    assert decision.arguments["command"] == ["python", "-m", "pytest", "tests"]
+
+
+def test_llm_decision_engine_rejects_invalid_recovery_output():
+    engine = LLMDecisionEngine(
+        StubProvider(
+            {
+                "decision_type": "tool_call",
+                "tool_name": "safe_cli_run",
+                "arguments": {"command": [], "cwd": "."},
+                "confidence": 0.5,
+                "explanation": "Bad retry payload.",
+            }
+        )
+    )
+
+    decision = engine.decide_recovery(
+        "run tests tests",
+        workspace_root=Path(".").resolve(),
+        tool_result={"returncode": 1, "stderr": "FAILED test_example"},
+    )
+
+    assert isinstance(decision, RejectDecision)
+    assert decision.reason == "Invalid decision output."

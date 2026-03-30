@@ -135,7 +135,17 @@ class LLMDecisionEngine(BaseDecisionEngine):
         self.provider = provider
 
     def decide(self, task: str, workspace_root: Path) -> ToolCallDecision | RejectDecision:
-        schema = {
+        prompt = (
+            "Return the next operator decision as structured data. "
+            f"Workspace root: {workspace_root}. "
+            f"Task: {task}"
+        )
+        raw = self.provider.generate_structured(prompt, self._decision_schema())
+        return self._parse_decision_output(raw)
+
+    @staticmethod
+    def _decision_schema() -> dict[str, str]:
+        return {
             "decision_type": "tool_call | reject | needs_human_input",
             "tool_name": "string",
             "arguments": "object",
@@ -144,12 +154,8 @@ class LLMDecisionEngine(BaseDecisionEngine):
             "confidence": "float",
             "explanation": "string",
         }
-        prompt = (
-            "Return the next operator decision as structured data. "
-            f"Workspace root: {workspace_root}. "
-            f"Task: {task}"
-        )
-        raw = self.provider.generate_structured(prompt, schema)
+
+    def _parse_decision_output(self, raw: object) -> ToolCallDecision | RejectDecision:
         if not isinstance(raw, dict):
             return self._invalid_output("The decision engine rejected non-object structured provider output.")
         decision_type = raw.get("decision_type")
@@ -211,8 +217,11 @@ class LLMDecisionEngine(BaseDecisionEngine):
         workspace_root: Path,
         tool_result: dict,
     ) -> ToolCallDecision | RejectDecision:
-        return RejectDecision(
-            reason="No bounded recovery decision is available.",
-            confidence=1.0,
-            explanation="The minimal LLM decision engine does not yet request follow-up recovery actions.",
+        prompt = (
+            "Return one bounded recovery decision as structured data after a failed operator action. "
+            f"Workspace root: {workspace_root}. "
+            f"Original task: {task}. "
+            f"Tool result: {tool_result!r}"
         )
+        raw = self.provider.generate_structured(prompt, self._decision_schema())
+        return self._parse_decision_output(raw)
