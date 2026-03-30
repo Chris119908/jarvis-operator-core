@@ -3,7 +3,7 @@
   "version_target": "v2.1",
   "current_goal": "Introduce structured decision-making with deterministic decision models and a mock decision engine while preserving V1 behavior.",
   "current_status": "completed",
-  "current_step": "Completed the initial V2 decision layer: structured decision models, mock and LLM decision engines, orchestrator integration, and one bounded deterministic recovery step.",
+  "current_step": "Completed the initial V2 decision layer and added integration proof that LLMDecisionEngine decisions execute and reject safely through the orchestrator.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -42,7 +42,8 @@
     "Implemented a minimal LLMDecisionEngine that validates structured provider output and safely rejects invalid or unsupported decisions."
     ,
     "Selected MockDecisionEngine or LLMDecisionEngine from the orchestrator config path based on the configured provider.",
-    "Introduced one bounded deterministic recovery attempt after failed decision-based tool execution with integration coverage."
+    "Introduced one bounded deterministic recovery attempt after failed decision-based tool execution with integration coverage.",
+    "Added orchestrator integration coverage for successful and invalid LLMDecisionEngine decisions."
   ],
   "pending_steps": [],
   "known_blockers": [],
@@ -52,5 +53,5 @@
     "tests/unit/test_decision_engine.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "passed: python -m pytest tests/integration/test_orchestrator.py tests/unit/test_decision_engine.py; python -m pytest tests"
+  "last_validation_status": "passed: python -m pytest tests/integration/test_orchestrator.py; python -m pytest tests"
 }

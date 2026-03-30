@@ -214,6 +214,23 @@ def test_from_config_selects_openai_compatible_provider():
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
+class StructuredProvider:
+    def __init__(self, payload: dict) -> None:
+        self.payload = payload
+
+    def health_check(self) -> bool:
+        return True
+
+    def generate_text(self, prompt: str) -> str:
+        return ""
+
+    def generate_structured(self, prompt: str, schema: dict) -> dict:
+        return self.payload
+
+    def get_model_name(self) -> str:
+        return "structured-provider"
+
+
 def test_from_config_uses_stable_workspace_root_when_cwd_changes(monkeypatch):
     monkeypatch.chdir("tests")
 
@@ -247,6 +264,65 @@ def test_orchestrator_uses_decision_engine_for_safe_cli_task():
     orchestrator.run("echo hello")
 
     assert decision_engine.tasks == [{"task": "echo hello", "workspace_root": REPO_ROOT}]
+
+
+def test_orchestrator_executes_llm_decision_engine_tool_call():
+    registry = ToolRegistry()
+    tool = RecordingTool()
+    registry.register("safe_cli_run", tool)
+    provider = StructuredProvider(
+        {
+            "decision_type": "tool_call",
+            "tool_name": "safe_cli_run",
+            "arguments": {
+                "command": ["python", "-c", "print('echo hello')"],
+                "cwd": str(REPO_ROOT),
+            },
+            "confidence": 0.95,
+            "explanation": "The user explicitly asked to echo text.",
+        }
+    )
+    orchestrator = Orchestrator(
+        registry,
+        provider,
+        workspace_root=REPO_ROOT,
+        decision_engine=LLMDecisionEngine(provider),
+    )
+
+    result = orchestrator.run("echo hello")
+
+    assert tool.calls == [
+        {
+            "command": ["python", "-c", "print('echo hello')"],
+            "cwd": str(REPO_ROOT),
+        }
+    ]
+    assert result["validation"]["success"] is True
+
+
+def test_orchestrator_rejects_invalid_llm_decision_output():
+    registry = ToolRegistry()
+    registry.register("safe_cli_run", RecordingTool())
+    provider = StructuredProvider(
+        {
+            "decision_type": "tool_call",
+            "confidence": 0.2,
+            "explanation": "Missing required fields.",
+        }
+    )
+    orchestrator = Orchestrator(
+        registry,
+        provider,
+        workspace_root=REPO_ROOT,
+        decision_engine=LLMDecisionEngine(provider),
+    )
+
+    try:
+        orchestrator.run("echo hello")
+    except ValueError as exc:
+        assert str(exc) == "Invalid decision output."
+    else:
+        raise AssertionError("Expected ValueError for invalid LLM decision output")
 
 
 def test_orchestrator_raises_for_rejected_decision():
