@@ -23,3 +23,36 @@ def test_main_runs_doctor_command(monkeypatch):
 
     assert cli.main() == 0
     assert called["config_path"] == "config.example.yaml"
+
+
+def test_cmd_doctor_configures_logging(monkeypatch):
+    called = {}
+
+    def fake_configure_logging(level: str) -> None:
+        called["level"] = level
+
+    monkeypatch.setattr(cli, "configure_logging", fake_configure_logging)
+
+    assert cli.cmd_doctor("config.example.yaml") == 0
+    assert called["level"] == "INFO"
+
+
+def test_cmd_run_configures_logging(monkeypatch):
+    called = {}
+
+    def fake_configure_logging(level: str) -> None:
+        called["level"] = level
+
+    class DummyOrchestrator:
+        @staticmethod
+        def from_config(config):
+            return DummyOrchestrator()
+
+        def run_task(self, task: str):
+            return {"tool_result": {"returncode": 0}, "validation": {"success": True}}
+
+    monkeypatch.setattr(cli, "configure_logging", fake_configure_logging)
+    monkeypatch.setattr(cli, "Orchestrator", DummyOrchestrator)
+
+    assert cli.cmd_run("echo hello", "config.example.yaml") == 0
+    assert called["level"] == "INFO"

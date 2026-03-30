@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from jarvis_operator.config import AppConfig
 from jarvis_operator.providers.mock_provider import MockProvider
 from jarvis_operator.providers.ollama_provider import OllamaProvider
@@ -7,6 +9,8 @@ from jarvis_operator.providers.openai_compatible_provider import OpenAICompatibl
 from jarvis_operator.tools.registry import ToolRegistry
 from jarvis_operator.tools.safe_cli_run import SafeCLIRunner
 from jarvis_operator.validation.validator import Validator
+
+logger = logging.getLogger(__name__)
 
 
 class Orchestrator:
@@ -44,6 +48,7 @@ class Orchestrator:
         return cls(registry, provider)
 
     def run(self, task: str) -> dict:
+        logger.info("Handling task: %s", task)
         tool = self.tool_registry.get("safe_cli_run")
 
         if task.startswith("run tests "):
@@ -120,6 +125,7 @@ class Orchestrator:
             raise ValueError("No tool mapping for task")
 
         validation = self.validator.validate(tool_result)
+        logger.info("Task validation success=%s", validation["success"])
         return {
             "tool_result": tool_result,
             "validation": validation,

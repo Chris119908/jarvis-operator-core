@@ -127,6 +127,19 @@ def test_failure_case_includes_failed_validation():
     }
 
 
+def test_orchestrator_logs_task_handling(caplog):
+    registry = ToolRegistry()
+    tool = RecordingTool()
+    registry.register("safe_cli_run", tool)
+    orchestrator = Orchestrator(registry, MockProvider())
+
+    with caplog.at_level("INFO"):
+        orchestrator.run("echo hello")
+
+    assert "Handling task: echo hello" in caplog.text
+    assert "Task validation success=True" in caplog.text
+
+
 def test_from_config_selects_mock_provider():
     orchestrator = Orchestrator.from_config(build_config("mock", "mock-model"))
 

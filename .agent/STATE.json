@@ -3,7 +3,7 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "in_progress",
-  "current_step": "Configured provider selection is now wired into the runtime path for mock, ollama, and openai_compatible.",
+  "current_step": "Logging is now integrated into the CLI and orchestrator runtime path with automated coverage.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -27,12 +27,13 @@
     "Verified the documented install-target commands through smoke tests for the console script.",
     "Implemented a minimal tested OllamaProvider with clear connectivity and generation behavior.",
     "Implemented a minimal tested OpenAI-compatible provider with clear connectivity and generation behavior.",
-    "Wired configured provider selection into the orchestrator runtime path with coverage for mock, ollama, and openai_compatible."
+    "Wired configured provider selection into the orchestrator runtime path with coverage for mock, ollama, and openai_compatible.",
+    "Integrated logging into the CLI and orchestrator runtime path with test coverage."
   ],
   "pending_steps": [
     "Assess remaining V1 definition-of-done gaps",
-    "Assess logging coverage in the real runtime path",
-    "Re-evaluate the remaining V1 definition-of-done gaps after provider wiring"
+    "Assess tool-contract gaps for read_file, write_file, and list_dir",
+    "Re-evaluate the remaining V1 definition-of-done gaps after logging coverage"
   ],
   "known_blockers": [],
   "created_artifacts": [
