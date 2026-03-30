@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 
 from jarvis_operator.config import AppConfig
+from jarvis_operator.decision import BaseDecisionEngine, LLMDecisionEngine, MockDecisionEngine
+from jarvis_operator.models import RejectDecision, ToolCallDecision
 from jarvis_operator.providers.mock_provider import MockProvider
 from jarvis_operator.providers.ollama_provider import OllamaProvider
 from jarvis_operator.providers.openai_compatible_provider import OpenAICompatibleProvider
@@ -15,11 +17,18 @@ logger = logging.getLogger(__name__)
 
 
 class Orchestrator:
-    def __init__(self, tool_registry: ToolRegistry, provider, workspace_root: Path | None = None) -> None:
+    def __init__(
+        self,
+        tool_registry: ToolRegistry,
+        provider,
+        workspace_root: Path | None = None,
+        decision_engine: BaseDecisionEngine | None = None,
+    ) -> None:
         self.tool_registry = tool_registry
         self.provider = provider
         self.validator = Validator()
         self.workspace_root = workspace_root or Path.cwd().resolve()
+        self.decision_engine = decision_engine or MockDecisionEngine()
 
     @classmethod
     def from_config(cls, config: AppConfig) -> "Orchestrator":
@@ -35,32 +44,33 @@ class Orchestrator:
         )
         if config.provider.type == "mock":
             provider = MockProvider()
+            decision_engine: BaseDecisionEngine = MockDecisionEngine()
         elif config.provider.type == "ollama":
             provider = OllamaProvider(
                 model=config.provider.model,
                 base_url=config.provider.base_url or "http://localhost:11434",
             )
+            decision_engine = LLMDecisionEngine(provider)
         elif config.provider.type == "openai_compatible":
             provider = OpenAICompatibleProvider(
                 model=config.provider.model,
                 base_url=config.provider.base_url or "http://localhost:8000/v1",
             )
+            decision_engine = LLMDecisionEngine(provider)
         else:
             raise NotImplementedError(f"Provider not yet implemented: {config.provider.type}")
 
-        return cls(registry, provider, workspace_root=workspace_root)
+        return cls(
+            registry,
+            provider,
+            workspace_root=workspace_root,
+            decision_engine=decision_engine,
+        )
 
     def run(self, task: str) -> dict:
         logger.info("Handling task: %s", task)
-        tool = self.tool_registry.get("safe_cli_run")
 
-        if task.startswith("run tests "):
-            target = task.removeprefix("run tests ").strip()
-            tool_result = tool.run(
-                ["python", "-m", "pytest", target],
-                cwd=self.workspace_root,
-            )
-        elif task.startswith("analyze log "):
+        if task.startswith("analyze log "):
             target = self._resolve_repo_path(task.removeprefix("analyze log ").strip())
             lines = target.read_text(encoding="utf-8").splitlines()
             errors = [line for line in lines if "ERROR" in line]
@@ -71,55 +81,19 @@ class Orchestrator:
                 "stderr": "",
                 "timed_out": False,
             }
-        elif task.startswith("create project "):
-            target = task.removeprefix("create project ").strip()
-            tool_result = tool.run(
-                [
-                    "python",
-                    "-c",
-                    (
-                        "from pathlib import Path; "
-                        f"root=Path({target!r}); "
-                        "(root / 'src').mkdir(parents=True, exist_ok=True); "
-                        "(root / 'tests').mkdir(parents=True, exist_ok=True); "
-                        "(root / 'src' / 'sample_package').mkdir(parents=True, exist_ok=True); "
-                        "(root / 'pyproject.toml').write_text('[project]\\nname = \"sample-project\"\\nversion = \"0.1.0\"\\n', encoding='utf-8'); "
-                        "(root / 'README.md').write_text('# Sample Project\\n', encoding='utf-8'); "
-                        "(root / 'src' / 'sample_package' / '__init__.py').write_text('__all__ = []\\n', encoding='utf-8'); "
-                        "print('project scaffold created')"
-                    ),
-                ],
-                cwd=self.workspace_root,
-            )
-        elif task.startswith("generate structure "):
-            remainder = task.removeprefix("generate structure ").strip()
-            spec_path, output_dir = remainder.split(" -> ", maxsplit=1)
-            tool_result = tool.run(
-                [
-                    "python",
-                    "-c",
-                    (
-                        "from pathlib import Path; "
-                        f"spec_text=Path({spec_path!r}).read_text(encoding='utf-8'); "
-                        f"root=Path({output_dir!r}); "
-                        "(root / 'src').mkdir(parents=True, exist_ok=True) if 'src/' in spec_text else None; "
-                        "(root / 'tests').mkdir(parents=True, exist_ok=True) if 'tests/' in spec_text else None; "
-                        "(root / 'pyproject.toml').write_text('', encoding='utf-8') if 'pyproject.toml' in spec_text else None; "
-                        "(root / 'README.md').write_text('', encoding='utf-8') if 'README.md' in spec_text else None; "
-                        "(root / 'src' / 'sample_package').mkdir(parents=True, exist_ok=True) if 'simple package module' in spec_text else None; "
-                        "(root / 'src' / 'sample_package' / '__init__.py').write_text('__all__ = []\\n', encoding='utf-8') if 'simple package module' in spec_text else None; "
-                        "print('structure generated')"
-                    ),
-                ],
-                cwd=self.workspace_root,
-            )
-        elif "echo" in task:
-            tool_result = tool.run(
-                ["python", "-c", f"print({task!r})"],
-                cwd=self.workspace_root,
-            )
         else:
-            raise ValueError("No tool mapping for task")
+            decision = self.decision_engine.decide(task, self.workspace_root)
+            if isinstance(decision, RejectDecision):
+                raise ValueError(decision.reason)
+
+            if not isinstance(decision, ToolCallDecision):
+                raise ValueError("Unsupported decision type")
+
+            tool = self.tool_registry.get(decision.tool_name)
+            tool_result = tool.run(
+                decision.arguments["command"],
+                cwd=decision.arguments["cwd"],
+            )
 
         validation = self.validator.validate(tool_result)
         logger.info("Task validation success=%s", validation["success"])
@@ -127,6 +101,32 @@ class Orchestrator:
             "tool_result": tool_result,
             "validation": validation,
         }
+        if not validation["success"] and not task.startswith("analyze log "):
+            recovery_decision = self.decision_engine.decide_recovery(
+                task,
+                self.workspace_root,
+                tool_result,
+            )
+            if isinstance(recovery_decision, ToolCallDecision):
+                recovery_tool = self.tool_registry.get(recovery_decision.tool_name)
+                recovery_tool_result = recovery_tool.run(
+                    recovery_decision.arguments["command"],
+                    cwd=recovery_decision.arguments["cwd"],
+                )
+                recovery_validation = self.validator.validate(recovery_tool_result)
+                result["recovery"] = {
+                    "attempted": True,
+                    "decision": recovery_decision.model_dump(),
+                    "tool_result": recovery_tool_result,
+                    "validation": recovery_validation,
+                }
+                result["initial_failure"] = {
+                    "tool_result": tool_result,
+                    "validation": validation,
+                }
+                result["tool_result"] = recovery_tool_result
+                result["validation"] = recovery_validation
+
         if task.startswith("run tests ") and not validation["success"]:
             result["failure_explanation"] = self._build_test_failure_explanation(tool_result)
         return result

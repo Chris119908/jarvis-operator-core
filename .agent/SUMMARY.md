@@ -1,17 +1,17 @@
 # Summary
 
-The analyze-log CI failure is now addressed by deriving the workspace root from the loaded config and using it consistently in the orchestrator.
+The initial V2 decision layer is now implemented.
 
 Evidence captured:
-- `src/jarvis_operator/config.py` now normalizes `runtime.workspace_root` and relative `tools.allowed_workspaces` against the config file location
-- `src/jarvis_operator/orchestrator.py` uses that stable workspace root for relative task paths and tool `cwd`
-- `src/jarvis_operator/orchestrator.py` now parses the resolved log file directly for the `analyze log` use case
-- the changed-working-directory case remains covered by E2E tests
-- GitHub CI still failed because `fixtures/logs/sample_error.log` was not tracked and was excluded by `.gitignore` via `logs/`
+- `src/jarvis_operator/models.py` includes structured decision models for `tool_call`, `reject`, and `needs_human_input`
+- `src/jarvis_operator/decision.py` defines `BaseDecisionEngine`, `MockDecisionEngine`, and `LLMDecisionEngine`
+- `src/jarvis_operator/orchestrator.py` routes safe_cli_run-backed tasks through the decision engine layer
+- the orchestrator selects `MockDecisionEngine` for the mock provider and `LLMDecisionEngine` for real providers
+- one bounded deterministic recovery attempt is now supported after a failed decision-based tool execution
 
 Validation result:
-- `python -m pytest tests/e2e/test_analyze_log.py`
+- `python -m pytest tests/integration/test_orchestrator.py tests/unit/test_decision_engine.py`
 - `python -m pytest tests`
 
 Status:
-- branch updated with the focused workspace-root fix and the missing tracked log fixture for the analyze-log CI issue
+- V2 initial decision-layer scope completed and ready for review or the next phase

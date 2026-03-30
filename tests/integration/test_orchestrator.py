@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from jarvis_operator.decision import BaseDecisionEngine, LLMDecisionEngine, MockDecisionEngine
+from jarvis_operator.models import RejectDecision, ToolCallDecision
 from jarvis_operator.config import AppConfig
 from jarvis_operator.providers.mock_provider import MockProvider
 from jarvis_operator.providers.ollama_provider import OllamaProvider
@@ -32,6 +34,45 @@ class FailingTool:
         }
 
 
+class FlakyTool:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def run(self, command: list[str], cwd: str) -> dict:
+        self.calls += 1
+        if self.calls == 1:
+            return {
+                "returncode": 1,
+                "stdout": "",
+                "stderr": "temporary failure",
+                "timed_out": False,
+            }
+        return {
+            "returncode": 0,
+            "stdout": "echo hello\n",
+            "stderr": "",
+            "timed_out": False,
+        }
+
+
+class RecordingDecisionEngine(BaseDecisionEngine):
+    def __init__(self, decision: ToolCallDecision | RejectDecision) -> None:
+        self.decision = decision
+        self.tasks: list[dict] = []
+
+    def decide(self, task: str, workspace_root: Path) -> ToolCallDecision | RejectDecision:
+        self.tasks.append({"task": task, "workspace_root": workspace_root})
+        return self.decision
+
+    def decide_recovery(
+        self,
+        task: str,
+        workspace_root: Path,
+        tool_result: dict,
+    ) -> ToolCallDecision | RejectDecision:
+        return self.decision
+
+
 def build_config(provider_type: str, model: str, base_url: str | None = None) -> AppConfig:
     return AppConfig.model_validate(
         {
@@ -62,7 +103,7 @@ def test_simple_task_execution():
     registry = ToolRegistry()
     tool = RecordingTool()
     registry.register("safe_cli_run", tool)
-    orchestrator = Orchestrator(registry, MockProvider())
+    orchestrator = Orchestrator(registry, MockProvider(), workspace_root=REPO_ROOT)
 
     result = orchestrator.run("echo hello")
 
@@ -75,14 +116,14 @@ def test_correct_tool_selection():
     registry = ToolRegistry()
     tool = RecordingTool()
     registry.register("safe_cli_run", tool)
-    orchestrator = Orchestrator(registry, MockProvider())
+    orchestrator = Orchestrator(registry, MockProvider(), workspace_root=REPO_ROOT)
 
     orchestrator.run("echo hello")
 
     assert tool.calls == [
         {
             "command": ["python", "-c", "print('echo hello')"],
-            "cwd": REPO_ROOT,
+            "cwd": str(REPO_ROOT),
         }
     ]
 
@@ -91,7 +132,7 @@ def test_result_structure_includes_validation():
     registry = ToolRegistry()
     tool = RecordingTool()
     registry.register("safe_cli_run", tool)
-    orchestrator = Orchestrator(registry, MockProvider())
+    orchestrator = Orchestrator(registry, MockProvider(), workspace_root=REPO_ROOT)
 
     result = orchestrator.run("echo hello")
 
@@ -115,7 +156,7 @@ def test_result_structure_includes_validation():
 def test_failure_case_includes_failed_validation():
     registry = ToolRegistry()
     registry.register("safe_cli_run", FailingTool())
-    orchestrator = Orchestrator(registry, MockProvider())
+    orchestrator = Orchestrator(registry, MockProvider(), workspace_root=REPO_ROOT)
 
     result = orchestrator.run("echo hello")
 
@@ -127,13 +168,14 @@ def test_failure_case_includes_failed_validation():
         "has_output": False,
         "error_detected": True,
     }
+    assert result["recovery"]["attempted"] is True
 
 
 def test_orchestrator_logs_task_handling(caplog):
     registry = ToolRegistry()
     tool = RecordingTool()
     registry.register("safe_cli_run", tool)
-    orchestrator = Orchestrator(registry, MockProvider())
+    orchestrator = Orchestrator(registry, MockProvider(), workspace_root=REPO_ROOT)
 
     with caplog.at_level("INFO"):
         orchestrator.run("echo hello")
@@ -146,6 +188,7 @@ def test_from_config_selects_mock_provider():
     orchestrator = Orchestrator.from_config(build_config("mock", "mock-model"))
 
     assert isinstance(orchestrator.provider, MockProvider)
+    assert isinstance(orchestrator.decision_engine, MockDecisionEngine)
 
 
 def test_from_config_selects_ollama_provider():
@@ -154,6 +197,7 @@ def test_from_config_selects_ollama_provider():
     )
 
     assert isinstance(orchestrator.provider, OllamaProvider)
+    assert isinstance(orchestrator.decision_engine, LLMDecisionEngine)
     assert orchestrator.provider.get_model_name() == "llama3"
 
 
@@ -163,6 +207,7 @@ def test_from_config_selects_openai_compatible_provider():
     )
 
     assert isinstance(orchestrator.provider, OpenAICompatibleProvider)
+    assert isinstance(orchestrator.decision_engine, LLMDecisionEngine)
     assert orchestrator.provider.get_model_name() == "gpt-4o-mini"
 
 
@@ -175,3 +220,69 @@ def test_from_config_uses_stable_workspace_root_when_cwd_changes(monkeypatch):
     orchestrator = Orchestrator.from_config(build_config("mock", "mock-model"))
 
     assert orchestrator.workspace_root == REPO_ROOT
+
+
+def test_orchestrator_uses_decision_engine_for_safe_cli_task():
+    registry = ToolRegistry()
+    tool = RecordingTool()
+    registry.register("safe_cli_run", tool)
+    decision_engine = RecordingDecisionEngine(
+        ToolCallDecision(
+            tool_name="safe_cli_run",
+            arguments={
+                "command": ["python", "-c", "print('echo hello')"],
+                "cwd": str(REPO_ROOT),
+            },
+            confidence=1.0,
+            explanation="Deterministic mock decision.",
+        )
+    )
+    orchestrator = Orchestrator(
+        registry,
+        MockProvider(),
+        workspace_root=REPO_ROOT,
+        decision_engine=decision_engine,
+    )
+
+    orchestrator.run("echo hello")
+
+    assert decision_engine.tasks == [{"task": "echo hello", "workspace_root": REPO_ROOT}]
+
+
+def test_orchestrator_raises_for_rejected_decision():
+    registry = ToolRegistry()
+    registry.register("safe_cli_run", RecordingTool())
+    decision_engine = RecordingDecisionEngine(
+        RejectDecision(
+            reason="Unsupported task.",
+            confidence=1.0,
+            explanation="No deterministic rule matched.",
+        )
+    )
+    orchestrator = Orchestrator(
+        registry,
+        MockProvider(),
+        workspace_root=REPO_ROOT,
+        decision_engine=decision_engine,
+    )
+
+    try:
+        orchestrator.run("unsupported task")
+    except ValueError as exc:
+        assert str(exc) == "Unsupported task."
+    else:
+        raise AssertionError("Expected ValueError for rejected decision")
+
+
+def test_orchestrator_applies_one_bounded_recovery_attempt():
+    registry = ToolRegistry()
+    tool = FlakyTool()
+    registry.register("safe_cli_run", tool)
+    orchestrator = Orchestrator(registry, MockProvider(), workspace_root=REPO_ROOT)
+
+    result = orchestrator.run("echo hello")
+
+    assert tool.calls == 2
+    assert result["validation"]["success"] is True
+    assert result["recovery"]["attempted"] is True
+    assert result["initial_failure"]["validation"]["success"] is False
