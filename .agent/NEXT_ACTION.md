@@ -1,7 +1,7 @@
 # Next Action
 
-Verify the `state_store` contract for the smallest missing case:
+Verify the next smallest `state_store` contract case:
 
-- add a unit test proving `StateStore.load_state()` returns an empty dict when `STATE.json` is missing
+- add a unit test proving `StateStore.load_state()` raises `JSONDecodeError` for a broken `STATE.json`
 - run the relevant unit tests
 - update `.agent/STATE.json`, `.agent/SUMMARY.md`, and `.agent/NEXT_ACTION.md`

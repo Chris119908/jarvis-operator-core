@@ -6,3 +6,9 @@ def test_state_store_roundtrip(tmp_path):
     data = {"hello": "world"}
     store.save_state(data)
     assert store.load_state() == data
+
+
+def test_state_store_returns_empty_dict_when_state_file_is_missing(tmp_path):
+    store = StateStore(tmp_path)
+
+    assert store.load_state() == {}
