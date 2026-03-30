@@ -50,6 +50,48 @@ class Orchestrator:
                 ],
                 cwd=".",
             )
+        elif task.startswith("create project "):
+            target = task.removeprefix("create project ").strip()
+            tool_result = tool.run(
+                [
+                    "python",
+                    "-c",
+                    (
+                        "from pathlib import Path; "
+                        f"root=Path({target!r}); "
+                        "(root / 'src').mkdir(parents=True, exist_ok=True); "
+                        "(root / 'tests').mkdir(parents=True, exist_ok=True); "
+                        "(root / 'src' / 'sample_package').mkdir(parents=True, exist_ok=True); "
+                        "(root / 'pyproject.toml').write_text('[project]\\nname = \"sample-project\"\\nversion = \"0.1.0\"\\n', encoding='utf-8'); "
+                        "(root / 'README.md').write_text('# Sample Project\\n', encoding='utf-8'); "
+                        "(root / 'src' / 'sample_package' / '__init__.py').write_text('__all__ = []\\n', encoding='utf-8'); "
+                        "print('project scaffold created')"
+                    ),
+                ],
+                cwd=".",
+            )
+        elif task.startswith("generate structure "):
+            remainder = task.removeprefix("generate structure ").strip()
+            spec_path, output_dir = remainder.split(" -> ", maxsplit=1)
+            tool_result = tool.run(
+                [
+                    "python",
+                    "-c",
+                    (
+                        "from pathlib import Path; "
+                        f"spec_text=Path({spec_path!r}).read_text(encoding='utf-8'); "
+                        f"root=Path({output_dir!r}); "
+                        "(root / 'src').mkdir(parents=True, exist_ok=True) if 'src/' in spec_text else None; "
+                        "(root / 'tests').mkdir(parents=True, exist_ok=True) if 'tests/' in spec_text else None; "
+                        "(root / 'pyproject.toml').write_text('', encoding='utf-8') if 'pyproject.toml' in spec_text else None; "
+                        "(root / 'README.md').write_text('', encoding='utf-8') if 'README.md' in spec_text else None; "
+                        "(root / 'src' / 'sample_package').mkdir(parents=True, exist_ok=True) if 'simple package module' in spec_text else None; "
+                        "(root / 'src' / 'sample_package' / '__init__.py').write_text('__all__ = []\\n', encoding='utf-8') if 'simple package module' in spec_text else None; "
+                        "print('structure generated')"
+                    ),
+                ],
+                cwd=".",
+            )
         elif "echo" in task:
             tool_result = tool.run(
                 ["python", "-c", f"print({task!r})"],
