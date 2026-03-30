@@ -13,9 +13,9 @@ class Validator:
         stderr = result.get("stderr", "")
 
         return {
-            "success": returncode == 0 and not timed_out,
+            "success": returncode is not None and returncode == 0 and not timed_out,
             "returncode": returncode,
             "timed_out": timed_out,
-            "has_output": bool(stdout),
-            "error_detected": bool(stderr),
+            "has_output": stdout.strip() != "",
+            "error_detected": stderr.strip() != "",
         }
