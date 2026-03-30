@@ -2,12 +2,16 @@
   "project_name": "jarvis-operator-core",
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
-  "current_status": "not_started",
-  "current_step": "Initialize repository skeleton and core project files.",
-  "completed_steps": [],
+  "current_status": "in_progress",
+  "current_step": "Config loading is implemented with validation for valid, invalid, and missing config files.",
+  "completed_steps": [
+    "Verified baseline project files already exist for the initial package skeleton.",
+    "Added and validated basic tests for config loading and CLI startup.",
+    "Hardened config loading for empty YAML input and expanded config loading tests.",
+    "Completed Issue #1 for robust config loading with unit tests for valid, invalid, and missing config files."
+  ],
   "pending_steps": [
-    "Create package structure",
-    "Add pyproject and configuration loading",
+    "Verify StateStore behavior for missing STATE.json with tests",
     "Implement mock LLM provider",
     "Implement state store",
     "Implement tool registry and safe_cli_run",
@@ -16,7 +20,9 @@
     "Run smoke checks"
   ],
   "known_blockers": [],
-  "created_artifacts": [],
+  "created_artifacts": [
+    "tests/unit/test_cli.py"
+  ],
   "selected_provider": "mock",
-  "last_validation_status": "not_validated"
+  "last_validation_status": "passed: python -m pytest tests/unit/test_config.py"
 }

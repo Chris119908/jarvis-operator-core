@@ -1,21 +1,15 @@
 # Summary
 
-Project initialization phase.
+Current iteration completed Issue #1 for config loading without expanding scope.
 
-Current objective:
-Build the first working version of Jarvis Operator Core as a CLI-first local operator system.
+Evidence captured:
+- `src/jarvis_operator/config.py`
+- `tests/unit/test_config.py`
+
+Validation result:
+- `python -m pytest tests/unit/test_config.py`
 
 Current focus:
-- repository skeleton
-- package structure
-- configuration
-- mock provider
-- state persistence
-- safe CLI tool
-- tests
-
-Constraints:
-- no scope expansion
-- no self-extension in v1
-- no UI beyond CLI
-- no feature without tests
+- keep progressing in the smallest tested increments
+- align implementation with tool contracts
+- avoid scope expansion beyond the v1 docs

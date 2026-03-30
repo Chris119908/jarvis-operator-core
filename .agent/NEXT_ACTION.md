@@ -1,12 +1,7 @@
 # Next Action
 
-Create the initial Python package structure and baseline project files:
+Verify the `state_store` contract for the smallest missing case:
 
-- pyproject.toml
-- README.md
-- config.example.yaml
-- src/jarvis_operator/__init__.py
-- src/jarvis_operator/cli.py
-- src/jarvis_operator/config.py
-
-Then add basic tests for config loading and CLI startup.
+- add a unit test proving `StateStore.load_state()` returns an empty dict when `STATE.json` is missing
+- run the relevant unit tests
+- update `.agent/STATE.json`, `.agent/SUMMARY.md`, and `.agent/NEXT_ACTION.md`
