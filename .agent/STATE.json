@@ -3,7 +3,7 @@
   "version_target": "v1",
   "current_goal": "Build the initial working CLI-based operator core with mock provider, state store, safe tools, and tests.",
   "current_status": "in_progress",
-  "current_step": "OllamaProvider now has a minimal real implementation with tests, and the full suite passes.",
+  "current_step": "Both non-mock providers now have minimal real implementations with tests, and the full suite passes.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -25,12 +25,13 @@
     "Validated the complete test suite with all tests passing.",
     "Added lightweight tests for the current Ollama and OpenAI-compatible provider placeholders.",
     "Verified the documented install-target commands through smoke tests for the console script.",
-    "Implemented a minimal tested OllamaProvider with clear connectivity and generation behavior."
+    "Implemented a minimal tested OllamaProvider with clear connectivity and generation behavior.",
+    "Implemented a minimal tested OpenAI-compatible provider with clear connectivity and generation behavior."
   ],
   "pending_steps": [
     "Assess remaining V1 definition-of-done gaps",
-    "Implement real swappable provider support for OpenAI-compatible APIs",
-    "Wire configured providers into the runtime path"
+    "Wire configured providers into the runtime path",
+    "Verify provider selection through configuration"
   ],
   "known_blockers": [],
   "created_artifacts": [

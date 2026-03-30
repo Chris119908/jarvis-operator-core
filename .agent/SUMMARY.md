@@ -1,14 +1,14 @@
 # Summary
 
-Current iteration implemented the first real non-mock provider in minimal form.
+Current iteration implemented the second real non-mock provider in minimal form.
 
 Evidence captured:
-- `src/jarvis_operator/providers/ollama_provider.py`
-- `tests/unit/test_ollama_provider.py`
+- `src/jarvis_operator/providers/openai_compatible_provider.py`
+- `tests/unit/test_openai_compatible_provider.py`
 - `tests/unit/test_provider_placeholders.py`
 
 Validation result:
-- `python -m pytest tests/unit/test_ollama_provider.py tests/unit/test_provider_placeholders.py`
+- `python -m pytest tests/unit/test_openai_compatible_provider.py tests/unit/test_provider_placeholders.py`
 - `python -m pytest tests`
 
 Current focus:
