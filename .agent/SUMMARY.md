@@ -1,12 +1,14 @@
 # Summary
 
-Current iteration verified the documented install-target behavior with smoke coverage.
+Current iteration implemented the first real non-mock provider in minimal form.
 
 Evidence captured:
-- `tests/smoke/test_smoke.py`
+- `src/jarvis_operator/providers/ollama_provider.py`
+- `tests/unit/test_ollama_provider.py`
+- `tests/unit/test_provider_placeholders.py`
 
 Validation result:
-- `python -m pytest tests/smoke/test_smoke.py`
+- `python -m pytest tests/unit/test_ollama_provider.py tests/unit/test_provider_placeholders.py`
 - `python -m pytest tests`
 
 Current focus:
