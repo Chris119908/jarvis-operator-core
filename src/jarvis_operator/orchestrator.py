@@ -33,6 +33,23 @@ class Orchestrator:
                 ["python", "-m", "pytest", target],
                 cwd=".",
             )
+        elif task.startswith("analyze log "):
+            target = task.removeprefix("analyze log ").strip()
+            tool_result = tool.run(
+                [
+                    "python",
+                    "-c",
+                    (
+                        "from pathlib import Path; "
+                        f"text=Path({target!r}).read_text(encoding='utf-8'); "
+                        "lines=text.splitlines(); "
+                        "errors=[line for line in lines if 'ERROR' in line]; "
+                        "warnings=[line for line in lines if 'WARNING' in line]; "
+                        "print(f'errors={len(errors)} warnings={len(warnings)}')"
+                    ),
+                ],
+                cwd=".",
+            )
         elif "echo" in task:
             tool_result = tool.run(
                 ["python", "-c", f"print({task!r})"],
