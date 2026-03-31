@@ -68,6 +68,31 @@ class MockDecisionEngine(BaseDecisionEngine):
                 explanation="The task explicitly asks to create a project scaffold.",
             )
 
+
+        if task.startswith("analyze log "):
+            target = task.removeprefix("analyze log ").strip()
+            return ToolCallDecision(
+                tool_name="safe_cli_run",
+                arguments={
+                    "command": [
+                        "python",
+                        "-c",
+                        (
+                            "from pathlib import Path; "
+                            f"target=Path({target!r}); "
+                            "target=target if target.is_absolute() else Path.cwd() / target; "
+                            "lines=target.resolve().read_text(encoding='utf-8').splitlines(); "
+                            "errors=sum(1 for line in lines if 'ERROR' in line); "
+                            "warnings=sum(1 for line in lines if 'WARNING' in line); "
+                            "print(f'errors={errors} warnings={warnings}')"
+                        ),
+                    ],
+                    "cwd": str(workspace_root),
+                },
+                confidence=1.0,
+                explanation="The task explicitly asks to analyze a log file.",
+            )
+
         if task.startswith("generate structure "):
             remainder = task.removeprefix("generate structure ").strip()
             spec_path, output_dir = remainder.split(" -> ", maxsplit=1)

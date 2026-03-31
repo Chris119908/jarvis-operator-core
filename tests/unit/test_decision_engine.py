@@ -40,6 +40,18 @@ def test_mock_decision_engine_returns_tool_call_for_echo():
     assert decision.arguments["cwd"] == str(Path(".").resolve())
 
 
+def test_mock_decision_engine_returns_tool_call_for_analyze_log():
+    engine = MockDecisionEngine()
+
+    decision = engine.decide(
+        "analyze log fixtures/logs/sample_error.log",
+        workspace_root=Path(".").resolve(),
+    )
+
+    assert isinstance(decision, ToolCallDecision)
+    assert decision.tool_name == "safe_cli_run"
+    assert decision.arguments["command"][0:2] == ["python", "-c"]
+
 def test_mock_decision_engine_rejects_unknown_task():
     engine = MockDecisionEngine()
 

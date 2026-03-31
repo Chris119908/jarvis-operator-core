@@ -249,6 +249,34 @@ def test_orchestrator_uses_decision_engine_for_safe_cli_task():
     assert decision_engine.tasks == [{"task": "echo hello", "workspace_root": REPO_ROOT}]
 
 
+def test_orchestrator_uses_decision_engine_for_analyze_log_task():
+    registry = ToolRegistry()
+    tool = RecordingTool()
+    registry.register("safe_cli_run", tool)
+    decision_engine = RecordingDecisionEngine(
+        ToolCallDecision(
+            tool_name="safe_cli_run",
+            arguments={
+                "command": ["python", "-c", "print('errors=1 warnings=0')"],
+                "cwd": str(REPO_ROOT),
+            },
+            confidence=1.0,
+            explanation="Deterministic mock decision for log analysis.",
+        )
+    )
+    orchestrator = Orchestrator(
+        registry,
+        MockProvider(),
+        workspace_root=REPO_ROOT,
+        decision_engine=decision_engine,
+    )
+
+    orchestrator.run("analyze log fixtures/logs/sample_error.log")
+
+    assert decision_engine.tasks == [
+        {"task": "analyze log fixtures/logs/sample_error.log", "workspace_root": REPO_ROOT}
+    ]
+
 def test_orchestrator_raises_for_rejected_decision():
     registry = ToolRegistry()
     registry.register("safe_cli_run", RecordingTool())
