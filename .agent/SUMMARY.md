@@ -1,17 +1,16 @@
 # Summary
 
-V2.2 default decision routing is now implemented in strict scope.
+Packaging/CLI smoke-test reliability issue is now fixed in strict scope.
 
 Completed in this iteration:
-- `src/jarvis_operator/orchestrator.py` now uses the decision layer as the standard execution path for orchestrated tasks instead of handling `analyze log` in a dedicated branch.
-- `src/jarvis_operator/decision.py` now includes a deterministic `analyze log` decision rule in `MockDecisionEngine` that routes log analysis through `safe_cli_run` while preserving output shape (`errors=<n> warnings=<n>`).
-- Integration coverage was extended to verify that `analyze log` tasks are routed through the decision engine.
-- Unit coverage was extended for the new deterministic `analyze log` decision rule.
+- Verified `pyproject.toml` already contains the correct console script mapping: `jarvis-operator = "jarvis_operator.cli:main"`.
+- Hardened smoke tests in `tests/smoke/test_smoke.py` to resolve `jarvis-operator` via `PATH` first and then fall back to the active Python scripts directory (`Path(sys.executable).parent`) including a Windows `.exe` candidate.
+- Kept CLI implementation unchanged because the packaging entrypoint was already correct.
 
 Validation evidence:
-- `python -m pytest tests/integration/test_orchestrator.py` ✅
-- `python -m pytest tests/unit/test_decision_engine.py tests/e2e/test_analyze_log.py` ✅
-- `python -m pytest tests` ⚠️ fails only in smoke tests because `jarvis-operator` is not available on PATH in this offline environment, and `pip install -e .` cannot fetch build dependencies due network/proxy restrictions.
+- `python -m pip install -e .` ✅
+- `python -m pytest tests/smoke/test_smoke.py` ✅ (3 passed)
+- `python -m pytest tests` ✅ (86 passed)
 
 Status:
-- V2.2 task goal achieved for default decision routing with bounded recovery retained and no planner/autonomous-loop expansion.
+- Smoke tests no longer depend solely on ambient PATH and now pass after editable install in this environment.

@@ -1,9 +1,9 @@
 {
   "project_name": "jarvis-operator-core",
   "version_target": "v2.2",
-  "current_goal": "Make structured decision routing the default orchestrator execution path while preserving V1/V2.1 behavior.",
+  "current_goal": "Fix packaging/CLI smoke test executable discovery for jarvis-operator.",
   "current_status": "completed",
-  "current_step": "Completed V2.2 default decision routing by removing orchestrator task-specific execution branching and routing analyze-log through the decision layer.",
+  "current_step": "Verified project script entrypoint and hardened smoke executable lookup with Python scripts-dir fallback.",
   "completed_steps": [
     "Verified baseline project files already exist for the initial package skeleton.",
     "Added and validated basic tests for config loading and CLI startup.",
@@ -42,7 +42,8 @@
     "Implemented a minimal LLMDecisionEngine that validates structured provider output and safely rejects invalid or unsupported decisions.",
     "Selected MockDecisionEngine or LLMDecisionEngine from the orchestrator config path based on the configured provider.",
     "Introduced one bounded deterministic recovery attempt after failed decision-based tool execution with integration coverage.",
-    "Completed V2.2 default decision routing: analyze-log now runs via deterministic ToolCallDecision, orchestrator task-specific execution branching was reduced, and bounded recovery behavior remained intact with integration coverage."
+    "Completed V2.2 default decision routing: analyze-log now runs via deterministic ToolCallDecision, orchestrator task-specific execution branching was reduced, and bounded recovery behavior remained intact with integration coverage.",
+    "Fixed smoke console-script discovery by keeping correct pyproject entrypoint and adding scripts-directory fallback when PATH lookup misses jarvis-operator."
   ],
   "pending_steps": [],
   "known_blockers": [],
@@ -52,5 +53,5 @@
     "tests/unit/test_decision_engine.py"
   ],
   "selected_provider": "mock",
-  "last_validation_status": "partial_pass: python -m pytest tests/integration/test_orchestrator.py; python -m pytest tests/unit/test_decision_engine.py tests/e2e/test_analyze_log.py; python -m pytest tests (fails only smoke console-script assertions because jarvis-operator is not installed in this offline environment)."
+  "last_validation_status": "pass: python -m pip install -e .; python -m pytest tests/smoke/test_smoke.py; python -m pytest tests (86 passed)."
 }
