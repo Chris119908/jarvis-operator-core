@@ -70,30 +70,18 @@ class Orchestrator:
     def run(self, task: str) -> dict:
         logger.info("Handling task: %s", task)
 
-        if task.startswith("analyze log "):
-            target = self._resolve_repo_path(task.removeprefix("analyze log ").strip())
-            lines = target.read_text(encoding="utf-8").splitlines()
-            errors = [line for line in lines if "ERROR" in line]
-            warnings = [line for line in lines if "WARNING" in line]
-            tool_result = {
-                "returncode": 0,
-                "stdout": f"errors={len(errors)} warnings={len(warnings)}\n",
-                "stderr": "",
-                "timed_out": False,
-            }
-        else:
-            decision = self.decision_engine.decide(task, self.workspace_root)
-            if isinstance(decision, RejectDecision):
-                raise ValueError(decision.reason)
+        decision = self.decision_engine.decide(task, self.workspace_root)
+        if isinstance(decision, RejectDecision):
+            raise ValueError(decision.reason)
 
-            if not isinstance(decision, ToolCallDecision):
-                raise ValueError("Unsupported decision type")
+        if not isinstance(decision, ToolCallDecision):
+            raise ValueError("Unsupported decision type")
 
-            tool = self.tool_registry.get(decision.tool_name)
-            tool_result = tool.run(
-                decision.arguments["command"],
-                cwd=decision.arguments["cwd"],
-            )
+        tool = self.tool_registry.get(decision.tool_name)
+        tool_result = tool.run(
+            decision.arguments["command"],
+            cwd=decision.arguments["cwd"],
+        )
 
         validation = self.validator.validate(tool_result)
         logger.info("Task validation success=%s", validation["success"])
@@ -101,7 +89,7 @@ class Orchestrator:
             "tool_result": tool_result,
             "validation": validation,
         }
-        if not validation["success"] and not task.startswith("analyze log "):
+        if not validation["success"]:
             recovery_decision = self.decision_engine.decide_recovery(
                 task,
                 self.workspace_root,
@@ -133,12 +121,6 @@ class Orchestrator:
 
     def run_task(self, task: str) -> dict:
         return self.run(task)
-
-    def _resolve_repo_path(self, raw_path: str) -> Path:
-        path = Path(raw_path)
-        if path.is_absolute():
-            return path.resolve()
-        return (self.workspace_root / path).resolve()
 
     @staticmethod
     def _build_test_failure_explanation(tool_result: dict) -> dict:
