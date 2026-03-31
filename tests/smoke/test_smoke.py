@@ -1,7 +1,26 @@
 import shutil
 import subprocess
+import sys
+from pathlib import Path
 
 from jarvis_operator.config import load_config
+
+
+def _resolve_console_script() -> str | None:
+    executable = shutil.which("jarvis-operator")
+    if executable is not None:
+        return executable
+
+    scripts_path = Path(sys.executable).resolve().parent
+    candidates = [
+        scripts_path / "jarvis-operator",
+        scripts_path / "jarvis-operator.exe",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+
+    return None
 
 
 def test_smoke_loads_config():
@@ -10,7 +29,7 @@ def test_smoke_loads_config():
 
 
 def test_smoke_console_script_doctor_runs():
-    executable = shutil.which("jarvis-operator")
+    executable = _resolve_console_script()
 
     assert executable is not None
 
@@ -26,7 +45,7 @@ def test_smoke_console_script_doctor_runs():
 
 
 def test_smoke_console_script_run_executes_task():
-    executable = shutil.which("jarvis-operator")
+    executable = _resolve_console_script()
 
     assert executable is not None
 
